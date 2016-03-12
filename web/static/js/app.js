@@ -23,7 +23,7 @@ let channel = socket.channel("game", {})
 channel.join()
 
 channel.on("updated_code", (data) => {
-  console.log("Reloading Elm app with the previous state and new code (keep in mind that this breaks inputs)")
+  console.log("Reloading Elm app (but keeping previous state)")
 
   // Remove old app
   app.dispose()
