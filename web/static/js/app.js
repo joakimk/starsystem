@@ -1,13 +1,20 @@
 import {Socket} from "phoenix"
 
+// Storing gamestate outside of Elm so we can swap out the code and
+// still be in the same state in the game
+window.gameState = { x: 100, y: 100 }
 
 function loadApp()
 {
   var gameElement = document.getElementById("js-game")
-  return Elm.embed(Elm.Game, gameElement, {})
-}
+  var app = Elm.embed(Elm.Game, gameElement, { initialGameState: window.gameState })
 
-window.app = loadApp()
+  app.ports.stateChange.subscribe((state) => {
+    window.gameState = state
+  })
+
+  window.app = app
+}
 
 let socket = new Socket("/socket", { params: {} })
 socket.connect()
@@ -27,5 +34,7 @@ channel.on("updated_code", (data) => {
   script.innerHTML = data.source;
   document.body.appendChild(script);
 
-  window.app = loadApp()
+  loadApp()
 })
+
+loadApp()

@@ -8,6 +8,7 @@
     <meta name="author" content="">
 
     <title>Starsystem</title>
+    <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
   </head>
 
   <body>
