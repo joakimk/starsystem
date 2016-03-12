@@ -26,6 +26,8 @@ you can edit the code and see the changes applied without the game resetting.
 
 # Commands used to deploy to heroku
 
+Deployed at <https://starsystemgame.herokuapp.com/>
+
     heroku apps:create starsystemgame --region eu
     heroku buildpacks:set https://github.com/gjaldon/phoenix-static-buildpack
     heroku buildpacks:add --index 1 https://github.com/HashNuke/heroku-buildpack-elixir
