@@ -16,7 +16,6 @@ render (w, h) gameState =
   -- later: remove duplication of height
 
   -- todo:
-  -- add rotation and
   -- add thruster active animation
   -- add add basic background stars
 
@@ -50,15 +49,21 @@ renderShip gameState =
     |> moveY gameState.y
   ]
   |> group
+  |> rotate (degrees gameState.direction)
 
 update : Input -> GameState -> GameState
 update input gameState =
-  if input.turnDirection == 1 then
-    { gameState | x = gameState.x + 5 }
-  else if input.thrustDirection == 1 then
-    { gameState | y = gameState.y + 5 }
-  else
-    gameState
+  let
+    degreesPerSecond = (360 * input.delta) / 2
+  in
+    if input.turnDirection == 1 then
+      { gameState | direction = gameState.direction - degreesPerSecond}
+    else if input.turnDirection == -1 then
+      { gameState | direction = gameState.direction + degreesPerSecond}
+    else if input.thrustDirection == 1 then
+      { gameState | y = gameState.y + 5 }
+    else
+      gameState
 
 -- Support code
 
@@ -75,8 +80,10 @@ input =
       (Signal.map .y Keyboard.wasd) -- thrust direction
       delta
 
+-- delta corresponds to the amount of change per second,
+-- e.g. if FPS is 1, then delta is 1, if FPS is 2, delta is 0.5.
 delta =
-  Signal.map inSeconds (fps 35)
+  Signal.map inSeconds (fps 60)
 
 port stateChange : Signal GameState
 port stateChange =
