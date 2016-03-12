@@ -6,6 +6,23 @@ The rough idea is to build a spaceship game where you can move around within a s
 
 **Status:** Basic hot-code-reload setup done. Not much of a game yet.
 
+
+# Dev
+
+    mix deps.get
+
+    cd web/elm
+    source paths.env
+    elm package install -y
+    cd ../..
+
+    mix phoenix.server
+
+Then visit <http://localhost:4000>, edit [web/elm/Game.elm](/web/elm/Game.elm) and see the changes.
+
+If you play the game (currently not much of a game, but W and D will move the box),
+you can edit the code and see the changes applied without the game resetting.
+
 # License
 
 Copyright (c) 2016 [Joakim Kolsjö](https://twitter.com/joakimk)
