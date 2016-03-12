@@ -31,13 +31,14 @@ renderBackground =
   |> filled black
 
 renderText (w, h) gameState =
-  Text.fromString (toString h)
-    |> Text.height 25
+  Text.fromString (toString gameState)
+    |> Text.height 16
     |> Text.color white
-    |> leftAligned
+    |> Text.monospace
+    |> rightAligned
     |> toForm
     |> moveY (-(1000/2) + 25)
-    |> moveX (-(1000/2) + 40)
+    --|> moveX (-(1000/2) + 40)
 
 renderShip gameState =
   [ (polygon [ (-25.0, -25.0), (0.0, 0.0), (25.0, -25.0) ])
