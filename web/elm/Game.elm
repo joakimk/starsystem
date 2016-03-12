@@ -16,6 +16,7 @@ render (w, h) gameState =
   -- later: remove duplication of height
 
   -- todo:
+  -- handle multiple inputs at the same time
   -- add thruster active animation
   -- add add basic background stars
 
