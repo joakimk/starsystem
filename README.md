@@ -4,8 +4,9 @@ Playing around with Elm and live code updates by building a game.
 
 The rough idea is to build a spaceship game where you can move around within a star system.
 
-**Status:** Basic hot-code-reload setup done. Not much of a game yet.
+When/if there is ever enough game there I hope to add multiplayer through the phoenix server.
 
+**Status:** Basic hot-code-reload setup done. Not much of a game yet.
 
 # Dev
 
@@ -22,6 +23,14 @@ Then visit <http://localhost:4000>, edit [web/elm/Game.elm](/web/elm/Game.elm) a
 
 If you play the game (currently not much of a game, but W and D will move the box),
 you can edit the code and see the changes applied without the game resetting.
+
+# Commands used to deploy to heroku
+
+    heroku apps:create starsystemgame --region eu
+    heroku buildpacks:set https://github.com/gjaldon/phoenix-static-buildpack
+    heroku buildpacks:add --index 1 https://github.com/HashNuke/heroku-buildpack-elixir
+    heroku config:set SECRET_KEY_BASE=$(elixir -e "IO.puts :crypto.strong_rand_bytes(64) |> Base.encode64")
+    git push heroku
 
 # License
 
