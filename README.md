@@ -21,7 +21,7 @@ When/if there is ever enough game there I hope to add multiplayer through the ph
 
 Then visit <http://localhost:4000>, edit [web/elm/Game.elm](/web/elm/Game.elm) and see the changes.
 
-If you play the game (currently not much of a game, but W and D will move the box),
+If you play the game (currently not much of a game, but A and D will rotate the ship),
 you can edit the code and see the changes applied without the game resetting.
 
 # Commands used to deploy to heroku

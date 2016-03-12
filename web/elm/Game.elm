@@ -41,12 +41,9 @@ renderText (w, h) gameState =
 renderShip gameState =
   [ (polygon [ (-25.0, -25.0), (0.0, 0.0), (25.0, -25.0) ])
     |> filled darkBlue
-    |> moveX gameState.x
-    |> moveY (gameState.y + 50)
+    |> moveY 50
   , square 50
     |> filled blue
-    |> moveX gameState.x
-    |> moveY gameState.y
   ]
   |> group
   |> rotate (degrees gameState.direction)
@@ -61,7 +58,7 @@ update input gameState =
     else if input.turnDirection == -1 then
       { gameState | direction = gameState.direction + degreesPerSecond}
     else if input.thrustDirection == 1 then
-      { gameState | y = gameState.y + 5 }
+      gameState
     else
       gameState
 
@@ -95,7 +92,7 @@ main =
   Signal.map2 render Window.dimensions gameState
 
 type alias GameState =
-  { x : Float, y : Float, direction: Float }
+  { vx : Float, vy : Float, direction: Float }
 
 type alias Input =
   { fire : Bool
