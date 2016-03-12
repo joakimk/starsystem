@@ -17,7 +17,9 @@ config :starsystem, Starsystem.Endpoint,
 config :starsystem, Starsystem.Endpoint,
   live_reload: [
     patterns: [
-      ~r{priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$},
+      # js intentionally not included here since we want to hot-reload
+      # the Elm app for a quicker development flow.
+      ~r{priv/static/.*(css|png|jpeg|jpg|gif|svg)$},
       ~r{web/views/.*(ex)$},
       ~r{web/templates/.*(eex)$}
     ]

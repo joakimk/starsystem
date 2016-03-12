@@ -7,7 +7,7 @@ import Keyboard exposing (..)
 
 main =
   collage 500 250 [
-    square 10
+    square 30
     |> filled color
   ]
 
