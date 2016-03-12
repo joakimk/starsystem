@@ -12,7 +12,11 @@ import Window
 render : (Int, Int) -> GameState -> Element
 render (w, h) gameState =
   collage 1000 1000 [
-    square 50
+    (polygon [ (-25.0, -25.0), (0.0, 0.0), (25.0, -25.0) ])
+    |> filled darkBlue
+    |> moveX gameState.x
+    |> moveY (gameState.y + 50)
+  , square 50
     |> filled blue
     |> moveX gameState.x
     |> moveY gameState.y
