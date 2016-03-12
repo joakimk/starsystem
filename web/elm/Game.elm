@@ -20,14 +20,14 @@ render (w, h) gameState =
   -- add thruster active animation
   -- add add basic background stars
 
-  collage w 500 [
+  collage w 1000 [
     renderBackground
   , renderText (w, h) gameState
   , renderShip gameState
   ]
 
 renderBackground =
-  square 500
+  square 1000
   |> filled black
 
 renderText (w, h) gameState =
@@ -36,8 +36,8 @@ renderText (w, h) gameState =
     |> Text.color white
     |> leftAligned
     |> toForm
-    |> moveY (-(500/2) + 25)
-    |> moveX (-(500/2) + 25)
+    |> moveY (-(1000/2) + 25)
+    |> moveX (-(1000/2) + 40)
 
 renderShip gameState =
   [ (polygon [ (-25.0, -25.0), (0.0, 0.0), (25.0, -25.0) ])
