@@ -5,14 +5,42 @@ import Graphics.Collage exposing (..)
 import Graphics.Element exposing (..)
 import Keyboard exposing (..)
 import Time exposing (..)
+import Text
 import Window
 
 -- Render and update
 
 render : (Int, Int) -> GameState -> Element
 render (w, h) gameState =
-  collage 1000 1000 [
-    (polygon [ (-25.0, -25.0), (0.0, 0.0), (25.0, -25.0) ])
+  -- later: figure out why height dimension does not seem to work
+  -- later: remove duplication of height
+
+  -- todo:
+  -- add rotation and
+  -- add thruster active animation
+  -- add add basic background stars
+
+  collage w 500 [
+    renderBackground
+  , renderText (w, h) gameState
+  , renderShip gameState
+  ]
+
+renderBackground =
+  square 500
+  |> filled black
+
+renderText (w, h) gameState =
+  Text.fromString (toString h)
+    |> Text.height 25
+    |> Text.color white
+    |> leftAligned
+    |> toForm
+    |> moveY (-(500/2) + 25)
+    |> moveX (-(500/2) + 25)
+
+renderShip gameState =
+  [ (polygon [ (-25.0, -25.0), (0.0, 0.0), (25.0, -25.0) ])
     |> filled darkBlue
     |> moveX gameState.x
     |> moveY (gameState.y + 50)
@@ -21,6 +49,7 @@ render (w, h) gameState =
     |> moveX gameState.x
     |> moveY gameState.y
   ]
+  |> group
 
 update : Input -> GameState -> GameState
 update input gameState =
@@ -59,7 +88,7 @@ main =
   Signal.map2 render Window.dimensions gameState
 
 type alias GameState =
-  { x : Float, y : Float }
+  { x : Float, y : Float, direction: Float }
 
 type alias Input =
   { fire : Bool
