@@ -6,7 +6,11 @@ The rough idea is to build a spaceship game where you can move around within a s
 
 When/if there is ever enough game there I hope to add multiplayer through the phoenix server.
 
-**Status:** Basic hot-code-reload setup done. Not much of a game yet.
+**Status:** Basic hot-code-reload setup done. Some basics in place.
+
+# Screenshot
+
+![](https://files.slack.com/files-pri/T03R80QEF-F0SE0B50W/screen_shot_2016-03-13_at_16.56.40.png)
 
 # Dev
 
