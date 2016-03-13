@@ -38,8 +38,8 @@ renderBackground (w, h) gameState =
     square 600
     |> filled black
   , gradient grad1 (circle 100)
-    |> move (200 + gameState.x, 85 + gameState.y)
-  , renderSpaceDust gameState
+    |> move (gameState.x, gameState.y)
+  --, renderSpaceDust gameState
   ]
   |> toForm
 
