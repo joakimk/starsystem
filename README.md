@@ -10,7 +10,7 @@ When/if there is ever enough game there I hope to add multiplayer through the ph
 
 # Screenshot
 
-![](https://files.slack.com/files-pri/T03R80QEF-F0SE0B50W/screen_shot_2016-03-13_at_16.56.40.png)
+![](https://dl.dropboxusercontent.com/u/136929/screen_shot_2016-03-13_at_16.56.40.png)
 
 # Dev
 
