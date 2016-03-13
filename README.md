@@ -34,6 +34,10 @@ Deployed at <https://starsystemgame.herokuapp.com/>
     heroku config:set SECRET_KEY_BASE=$(elixir -e "IO.puts :crypto.strong_rand_bytes(64) |> Base.encode64")
     git push heroku
 
+# Credits
+
+Ship graphics by "JM.Atencia", from <http://opengameart.org/content/rocket>.
+
 # License
 
 Copyright (c) 2016 [Joakim Kolsjö](https://twitter.com/joakimk)

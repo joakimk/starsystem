@@ -119,14 +119,12 @@ renderText (w, h) gameState =
       --|> moveX (-(600/2) + 40)
 
 renderShip gameState =
-  [ (polygon [ (-25.0, -25.0), (0.0, 0.0), (25.0, -25.0) ])
-    |> filled darkBlue
-    |> moveY 50
-  , square 50
-    |> filled blue
-  ]
-  |> group
-  |> rotate (degrees gameState.direction)
+  let
+    texture = if gameState.engineRunning then "ship_on" else "ship_off"
+  in
+    image 50 80 ("/images/" ++ texture ++ ".png")
+    |> toForm
+    |> rotate (degrees gameState.direction)
 
 update : Input -> GameState -> GameState
 update input gameState =
@@ -148,9 +146,10 @@ applyInputs input gameState =
       { gameState |
         vy = gameState.vy - 100 * (gameState.direction |> degrees |> cos) * input.delta
       , vx = gameState.vx + 100 * (gameState.direction |> degrees |> sin) * input.delta
+      , engineRunning = True
       }
     else
-      gameState
+      { gameState | engineRunning = False }
 
 normalizeDirection direction =
   if direction > 360 then
@@ -229,7 +228,7 @@ main =
   Signal.map2 render Window.dimensions gameState
 
 type alias GameState =
-  { x : Float, y : Float, vx : Float, vy : Float, direction: Float }
+  { x : Float, y : Float, vx : Float, vy : Float, direction: Float, engineRunning: Bool }
 
 type alias Input =
   { fire : Bool
