@@ -16,6 +16,10 @@ render (w, h) gameState =
   -- later: remove duplication of height
 
   -- todo:
+  -- make the ship look in the direction of flight when no inputs are made
+  -- add direction arrows
+  -- figure out a co-ordinate system, size for sun, gravity, etc based on real numbers
+     -- gravity acceleration based on distance
   -- handle multiple inputs at the same time
   -- add space dust to show movement
   -- add thruster active animation
@@ -24,7 +28,8 @@ render (w, h) gameState =
 
   collage 600 600 [
     renderBackground (w, h) gameState
-  , renderText (w, h) gameState
+  , renderDirectionIndicators gameState
+  --, renderText (w, h) gameState
   , renderShip gameState
   ]
 
@@ -42,6 +47,40 @@ renderBackground (w, h) gameState =
   --, renderSpaceDust gameState
   ]
   |> toForm
+
+renderDirectionIndicators gameState =
+  let
+    sunDirection = directionToTheSun gameState
+    sunDistance = distanceTo (0, 0) gameState
+    sunDv = (gameState.vx |> round |> abs) + (gameState.vy |> round |> abs)
+    -- better indicator:
+    -- where is the intersection with edge of screen?
+    -- or: show arrow?
+    text = "Sun direction: " ++ (toString (sunDirection |> round)) ++ ", distance: " ++ (sunDistance |> round |> toString) ++ ", relative speed: " ++ (sunDv |> toString)
+  in
+    if sunDistance > 0 then
+      [
+        Text.fromString text
+          |> Text.height 16
+          |> Text.color white
+          |> Text.monospace
+          |> rightAligned
+          |> toForm
+          |> moveX 0
+          |> moveY 280
+      , Text.fromString ("Your direction: " ++ (gameState.direction |> round |> toString))
+          |> Text.height 16
+          |> Text.color white
+          |> Text.monospace
+          |> rightAligned
+          |> toForm
+          |> moveX 0
+          |> moveY (280 - 16)
+     ]
+     |> group
+    else
+      -- todo: render nothing
+      renderSpaceDust gameState
 
 renderSpaceDust gameState =
   [
@@ -66,7 +105,8 @@ renderText (w, h) gameState =
     , vy = (round gameState.vy)
     , x = (round gameState.x)
     , y = (round gameState.y)
-    , dvToSun = (gameState.vx |> round |> abs) + (gameState.vy |> round |> abs)
+    , dv = (gameState.vx |> round |> abs) + (gameState.vy |> round |> abs)
+    , dir = (gameState.direction |> round)
   }
   in
     Text.fromString (toString debugInfo)
@@ -93,6 +133,7 @@ update input gameState =
   gameState
   |> applyInputs input
   |> applyMovement input
+  |> applyLookingAtSun input
   |> applySolarGravity input
 
 applyInputs input gameState =
@@ -100,9 +141,9 @@ applyInputs input gameState =
     degreesPerSecond = (360 * input.delta) / 2
   in
     if input.turnDirection == 1 then
-      { gameState | direction = gameState.direction - degreesPerSecond}
+      { gameState | direction = (normalizeDirection gameState.direction - degreesPerSecond)}
     else if input.turnDirection == -1 then
-      { gameState | direction = gameState.direction + degreesPerSecond}
+      { gameState | direction = (normalizeDirection gameState.direction + degreesPerSecond)}
     else if input.thrustDirection == 1 then
       { gameState |
         vy = gameState.vy - 100 * (gameState.direction |> degrees |> cos) * input.delta
@@ -110,6 +151,14 @@ applyInputs input gameState =
       }
     else
       gameState
+
+normalizeDirection direction =
+  if direction > 360 then
+     360 - direction
+  else if direction < 0 then
+     direction + 360
+  else
+     direction
 
 applyMovement input gameState =
   { gameState |
@@ -123,8 +172,32 @@ applySolarGravity input gameState =
   , vx = gameState.vx + 50 * (gameState |> directionToTheSun |> degrees |> sin) * input.delta
   }
 
+applyLookingAtSun input gameState =
+  let
+    newDirection = gameState.direction - ((gameState.direction - (directionToTheSun gameState)) * 0.5 * input.delta)
+  in
+    if playerIsChangingSpeedOrDirection input then
+      gameState
+    else
+      { gameState |
+        direction = (normalizeDirection newDirection)
+      }
+
+playerIsChangingSpeedOrDirection input =
+  input.turnDirection /= 0 || input.thrustDirection /= 0
+
 directionToTheSun gameState =
-  360 - (180 / pi) * (atan2 gameState.x  gameState.y)
+  let
+    temp = (360 - (180 / pi) * (atan2 gameState.x  gameState.y)) |> round
+  in
+    (temp % 360) |> normalizeDirection
+
+distanceTo (targetX, targetY) gameState =
+  let
+    xDiff = targetX - gameState.x
+    yDiff = targetY - gameState.y
+  in
+    sqrt (xDiff^2 + yDiff^2)
 
 -- Support code
 
