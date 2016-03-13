@@ -22,7 +22,7 @@ render (w, h) gameState =
   -- useful for planets and sun, maybe in combination with textures http://elm-lang.org/examples/radial-gradient
   -- add turn sluggishness, starting and stopping
 
-  collage w 600 [
+  collage 600 600 [
     renderBackground (w, h) gameState
   , renderText (w, h) gameState
   , renderShip gameState
