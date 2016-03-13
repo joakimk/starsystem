@@ -155,8 +155,8 @@ applyInputs input gameState =
       { gameState | direction = (normalizeDirection gameState.direction + degreesPerSecond)}
     else if input.thrustDirection == 1 then
       { gameState |
-        vy = gameState.vy - 10 * (gameState.direction |> degrees |> cos) * input.delta
-      , vx = gameState.vx + 10 * (gameState.direction |> degrees |> sin) * input.delta
+        vy = gameState.vy - 20 * (gameState.direction |> degrees |> cos) * input.delta
+      , vx = gameState.vx + 20 * (gameState.direction |> degrees |> sin) * input.delta
       , engineRunning = True
       }
     else
