@@ -36,14 +36,26 @@ render (w, h) gameState =
 
 
 renderBackground (w, h) gameState =
-  collage w 600 [
-    square 600
-    |> filled black
-  , gradient grad1 (circle 300)
-    |> move (gameState.x, gameState.y)
-  --, renderSpaceDust gameState
-  ]
-  |> toForm
+  let
+    color =
+      radial (0,0) 50 (0,10) 280
+        [ (  0, rgb  244 (180 + (75 |> applySolarStateFrom gameState)) 1)
+        , (0.8, rgb  228 200 100)
+        , (  1, rgba 128 (100 |> applySolarStateFrom gameState) 100 0)
+        ]
+  in
+    collage w 600 [
+      square 600
+      |> filled black
+    , gradient color (circle 300)
+      |> move (gameState.x, gameState.y)
+    --, renderSpaceDust gameState
+    ]
+    |> toForm
+
+applySolarStateFrom gameState number =
+  number * gameState.solarState
+  |> round
 
 renderDirectionIndicators gameState =
   let
@@ -90,14 +102,6 @@ renderText (x, y) text =
   |> moveX x
   |> moveY y
 
-grad1 : Gradient
-grad1 =
-  radial (0,0) 50 (0,10) 280
-    [ (  0, rgb  244 242 1)
-    , (0.8, rgb  228 199 0)
-    , (  1, rgba 228 199 0 0)
-    ]
-
 -- Update
 
 update : Input -> GameState -> GameState
@@ -106,7 +110,24 @@ update input gameState =
   |> applyInputs input
   |> applyMovement input
   |> applySolarGravity input
+  |> changeSolarState input
   |> applyLookingAtSun input
+
+changeSolarState input gameState =
+  if gameState.solarStateDirection == 0 then
+    if gameState.solarState > 1 then
+      { gameState | solarStateDirection = 1 }
+    else
+      { gameState |
+        solarState = gameState.solarState + 0.5 * input.delta
+      }
+  else
+    if gameState.solarState < 0 then
+      { gameState | solarStateDirection = 0 }
+    else
+      { gameState |
+        solarState = gameState.solarState - 0.5 * input.delta
+      }
 
 applyInputs input gameState =
   let
@@ -204,7 +225,7 @@ main =
   Signal.map2 render Window.dimensions gameState
 
 type alias GameState =
-  { x : Float, y : Float, vx : Float, vy : Float, direction: Float, engineRunning: Bool }
+  { x : Float, y : Float, vx : Float, vy : Float, direction: Float, engineRunning: Bool, solarState : Float, solarStateDirection : Int }
 
 type alias Input =
   { fire : Bool
