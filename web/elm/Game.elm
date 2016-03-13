@@ -18,8 +18,10 @@ render (w, h) gameState =
   -- todo:
   -- make the ship look in the direction of flight when no inputs are made
   -- add direction arrows
+  -- directionToTheSun rounds the numbers because % can't handle floats, this probably introduces some errors
   -- figure out a co-ordinate system, size for sun, gravity, etc based on real numbers
      -- gravity acceleration based on distance
+  -- add planets
   -- handle multiple inputs at the same time
   -- add space dust to show movement
   -- add thruster active animation
