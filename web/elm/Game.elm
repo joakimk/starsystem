@@ -8,7 +8,7 @@ import Time exposing (..)
 import Text
 import Window
 
--- Render and update
+-- Render
 
 render : (Int, Int) -> GameState -> Element
 render (w, h) gameState =
@@ -31,20 +31,15 @@ render (w, h) gameState =
   collage 600 600 [
     renderBackground (w, h) gameState
   , renderDirectionIndicators gameState
-  --, renderText (w, h) gameState
   , renderShip gameState
   ]
 
 
 renderBackground (w, h) gameState =
-  -- this is laggy
-  --croppedImage (round gameState.x, round gameState.y) 600 600 "images/background1.jpg"
-  --|> toForm
-
   collage w 600 [
     square 600
     |> filled black
-  , gradient grad1 (circle 100)
+  , gradient grad1 (circle 300)
     |> move (gameState.x, gameState.y)
   --, renderSpaceDust gameState
   ]
@@ -60,24 +55,9 @@ renderDirectionIndicators gameState =
     -- or: show arrow?
     text = "Sun direction: " ++ (toString (sunDirection |> round)) ++ ", distance: " ++ (sunDistance |> round |> toString) ++ ", relative speed: " ++ (sunDv |> toString)
   in
-    if sunDistance > 0 then
-      [
-        Text.fromString text
-          |> Text.height 16
-          |> Text.color white
-          |> Text.monospace
-          |> rightAligned
-          |> toForm
-          |> moveX 0
-          |> moveY 280
-      , Text.fromString ("Your direction: " ++ (gameState.direction |> round |> toString))
-          |> Text.height 16
-          |> Text.color white
-          |> Text.monospace
-          |> rightAligned
-          |> toForm
-          |> moveX 0
-          |> moveY (280 - 16)
+    if sunDistance > 650 then
+      [ renderText (0, 280) text
+      , renderText (0, 280 - 16) ("Your direction: " ++ (gameState.direction |> round |> toString))
      ]
      |> group
     else
@@ -92,34 +72,6 @@ renderSpaceDust gameState =
   ]
   |> group
 
-grad1 : Gradient
-grad1 =
-  radial (0,0) 50 (0,10) 90
-    [ (  0, rgb  244 242 1)
-    , (0.8, rgb  228 199 0)
-    , (  1, rgba 228 199 0 0)
-    ]
-
-renderText (w, h) gameState =
-  let
-    debugInfo = {
-      vx = (round gameState.vx)
-    , vy = (round gameState.vy)
-    , x = (round gameState.x)
-    , y = (round gameState.y)
-    , dv = (gameState.vx |> round |> abs) + (gameState.vy |> round |> abs)
-    , dir = (gameState.direction |> round)
-  }
-  in
-    Text.fromString (toString debugInfo)
-      |> Text.height 16
-      |> Text.color white
-      |> Text.monospace
-      |> rightAligned
-      |> toForm
-      |> moveY (-(600/2) + 25)
-      --|> moveX (-(600/2) + 40)
-
 renderShip gameState =
   let
     texture = if gameState.engineRunning then "ship_on" else "ship_off"
@@ -128,13 +80,33 @@ renderShip gameState =
     |> toForm
     |> rotate (degrees gameState.direction)
 
+renderText (x, y) text =
+  Text.fromString text
+  |> Text.height 16
+  |> Text.color white
+  |> Text.monospace
+  |> rightAligned
+  |> toForm
+  |> moveX x
+  |> moveY y
+
+grad1 : Gradient
+grad1 =
+  radial (0,0) 50 (0,10) 280
+    [ (  0, rgb  244 242 1)
+    , (0.8, rgb  228 199 0)
+    , (  1, rgba 228 199 0 0)
+    ]
+
+-- Update
+
 update : Input -> GameState -> GameState
 update input gameState =
   gameState
   |> applyInputs input
   |> applyMovement input
-  |> applyLookingAtSun input
   |> applySolarGravity input
+  |> applyLookingAtSun input
 
 applyInputs input gameState =
   let
@@ -152,14 +124,6 @@ applyInputs input gameState =
       }
     else
       { gameState | engineRunning = False }
-
-normalizeDirection direction =
-  if direction > 360 then
-     360 - direction
-  else if direction < 0 then
-     direction + 360
-  else
-     direction
 
 applyMovement input gameState =
   { gameState |
@@ -193,12 +157,22 @@ directionToTheSun gameState =
   in
     (temp % 360) |> normalizeDirection
 
+-- Generic maths
+
 distanceTo (targetX, targetY) gameState =
   let
     xDiff = targetX - gameState.x
     yDiff = targetY - gameState.y
   in
     sqrt (xDiff^2 + yDiff^2)
+
+normalizeDirection direction =
+  if direction > 360 then
+     360 - direction
+  else if direction < 0 then
+     direction + 360
+  else
+     direction
 
 -- Support code
 
