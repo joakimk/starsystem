@@ -2,7 +2,7 @@ import {Socket} from "phoenix"
 
 // Storing gamestate outside of Elm so we can swap out the code and
 // still be in the same state in the game
-window.gameState = { vx: 0, vy: 0, direction: 0 }
+window.gameState = { x: 0, y: 0, vx: 0, vy: 0, direction: 0 }
 
 function loadApp()
 {
