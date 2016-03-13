@@ -31,9 +31,25 @@ render (w, h) gameState =
   collage 800 800 [
     renderBackground (w, h) gameState
   , renderDirectionIndicators gameState
+  , renderOrbitalBodies gameState
   , renderShip gameState
   ]
 
+renderOrbitalBodies gameState =
+  (List.map (renderOrbitalBody gameState) gameState.orbitalBodies)
+  |> group
+
+renderOrbitalBody gameState orbitalBody =
+  let
+    color =
+      radial (0,0) 50 (0, 10) (orbitalBody.size * 0.95)
+        [ (  0, rgb  250 150 20)
+        , (0.8, rgb  170 100 100)
+        , (  1, rgba 50 100 10 0)
+        ]
+  in
+    gradient color (circle orbitalBody.size)
+    |> move (orbitalBody.x + gameState.x, orbitalBody.y + gameState.y)
 
 renderBackground (w, h) gameState =
   let
@@ -139,8 +155,8 @@ applyInputs input gameState =
       { gameState | direction = (normalizeDirection gameState.direction + degreesPerSecond)}
     else if input.thrustDirection == 1 then
       { gameState |
-        vy = gameState.vy - 100 * (gameState.direction |> degrees |> cos) * input.delta
-      , vx = gameState.vx + 100 * (gameState.direction |> degrees |> sin) * input.delta
+        vy = gameState.vy - 10 * (gameState.direction |> degrees |> cos) * input.delta
+      , vx = gameState.vx + 10 * (gameState.direction |> degrees |> sin) * input.delta
       , engineRunning = True
       }
     else
@@ -154,8 +170,8 @@ applyMovement input gameState =
 
 applySolarGravity input gameState =
   { gameState |
-    vy = gameState.vy - 50 * (gameState |> directionToTheSun |> degrees |> cos) * input.delta
-  , vx = gameState.vx + 50 * (gameState |> directionToTheSun |> degrees |> sin) * input.delta
+    vy = gameState.vy - 10 * (gameState |> directionToTheSun |> degrees |> cos) * input.delta
+  , vx = gameState.vx + 10 * (gameState |> directionToTheSun |> degrees |> sin) * input.delta
   }
 
 applyLookingAtSun input gameState =
@@ -225,7 +241,23 @@ main =
   Signal.map2 render Window.dimensions gameState
 
 type alias GameState =
-  { x : Float, y : Float, vx : Float, vy : Float, direction: Float, engineRunning: Bool, solarState : Float, solarStateDirection : Int }
+  { x : Float
+  , y : Float
+  , vx : Float
+  , vy : Float
+  , direction: Float
+  , engineRunning: Bool
+  , solarState : Float
+  , solarStateDirection : Int
+  , orbitalBodies: List OrbitalBody
+  }
+
+type alias OrbitalBody =
+  { x : Float
+  , y : Float
+  , size : Float
+  , gravity : Int
+  }
 
 type alias Input =
   { fire : Bool
