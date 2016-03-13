@@ -60,14 +60,23 @@ grad1 =
     ]
 
 renderText (w, h) gameState =
-  Text.fromString (toString (gameState))
-    |> Text.height 16
-    |> Text.color white
-    |> Text.monospace
-    |> rightAligned
-    |> toForm
-    |> moveY (-(600/2) + 25)
-    --|> moveX (-(600/2) + 40)
+  let
+    debugInfo = {
+      vx = (round gameState.vx)
+    , vy = (round gameState.vy)
+    , x = (round gameState.x)
+    , y = (round gameState.y)
+    , dvToSun = (gameState.vx |> round |> abs) + (gameState.vy |> round |> abs)
+  }
+  in
+    Text.fromString (toString debugInfo)
+      |> Text.height 16
+      |> Text.color white
+      |> Text.monospace
+      |> rightAligned
+      |> toForm
+      |> moveY (-(600/2) + 25)
+      --|> moveX (-(600/2) + 40)
 
 renderShip gameState =
   [ (polygon [ (-25.0, -25.0), (0.0, 0.0), (25.0, -25.0) ])
@@ -84,6 +93,7 @@ update input gameState =
   gameState
   |> applyInputs input
   |> applyMovement input
+  |> applySolarGravity input
 
 applyInputs input gameState =
   let
@@ -106,6 +116,15 @@ applyMovement input gameState =
     y = gameState.y + gameState.vy * input.delta
   , x = gameState.x + gameState.vx * input.delta
   }
+
+applySolarGravity input gameState =
+  { gameState |
+    vy = gameState.vy - 50 * (gameState |> directionToTheSun |> degrees |> cos) * input.delta
+  , vx = gameState.vx + 50 * (gameState |> directionToTheSun |> degrees |> sin) * input.delta
+  }
+
+directionToTheSun gameState =
+  360 - (180 / pi) * (atan2 gameState.x  gameState.y)
 
 -- Support code
 
