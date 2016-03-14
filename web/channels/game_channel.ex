@@ -17,4 +17,9 @@ defmodule Starsystem.GameChannel do
 
     {:noreply, socket}
   end
+
+  def handle_in("ping", data, socket) do
+    push socket, "pong", data
+    {:noreply, socket}
+  end
 end

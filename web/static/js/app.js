@@ -10,13 +10,14 @@ window.gameState = {
   solarState: 0, solarStateDirection: 0,
   orbitalBodies: [
     { x: -500, y: 350, size: 100, gravity: 5 }
-  ]
+  ],
+  ping: 0
 }
 
 function loadApp()
 {
   var gameElement = document.getElementById("js-game")
-  var app = Elm.embed(Elm.Game, gameElement, { initialGameState: window.gameState })
+  var app = Elm.embed(Elm.Game, gameElement, { initialGameState: window.gameState, ping: 0 })
 
   app.ports.stateChange.subscribe((state) => {
     window.gameState = state
@@ -47,3 +48,16 @@ channel.on("updated_code", (data) => {
 })
 
 loadApp()
+
+// Get server ping
+function ping() {
+  channel.push("ping", { timestamp: Date.now() })
+}
+
+channel.on("pong", (data) => {
+  app.ports.ping.send(Date.now() - data.timestamp)
+  setTimeout(ping, 1000)
+})
+
+ping()
+

@@ -18,11 +18,10 @@ render (w, h) gameState =
   -- todo
 
   -- Multiplayer
-    -- set up "ping" to server, print on screen
+    -- add presence
       -- get player-id
       -- set nickname
-      -- possibly js-only, push ping, id and nickname into Elm?
-        -- simple html form to ask for nickname
+      -- simple html form to ask for nickname add as query param?
     -- refactor player, considering multiplay
       -- controll own player-id with local controls?
       -- players [ { x = 1, id = 0 }, ]
@@ -47,6 +46,7 @@ render (w, h) gameState =
 
   collage 800 800 [
     renderBackground (w, h) gameState
+  , renderPing gameState
   , renderDirectionIndicators gameState
   , renderOrbitalBodies gameState
   , renderShip gameState
@@ -85,6 +85,9 @@ renderBackground (w, h) gameState =
     --, renderSpaceDust gameState
     ]
     |> toForm
+
+renderPing gameState =
+  renderText (330, 380) ("ping: " ++ (toString gameState.ping))
 
 applySolarStateFrom gameState number =
   number * gameState.solarState
@@ -140,11 +143,15 @@ renderText (x, y) text =
 update : Input -> GameState -> GameState
 update input gameState =
   gameState
+  |> applyPing input
   |> applyInputs input
   |> applyMovement input
   |> applySolarGravity input
   |> changeSolarState input
   |> applyLookingAtSun input
+
+applyPing input gameState =
+  { gameState | ping = input.ping }
 
 changeSolarState input gameState =
   if gameState.solarStateDirection == 0 then
@@ -237,10 +244,11 @@ gameState =
 input : Signal Input
 input =
   Signal.sampleOn delta <|
-    Signal.map4 Input
+    Signal.map5 Input
       Keyboard.space -- # fire
       (Signal.map .x Keyboard.wasd) -- turn direction
       (Signal.map .y Keyboard.wasd) -- thrust direction
+      ping
       delta
 
 -- delta corresponds to the amount of change per second,
@@ -254,6 +262,8 @@ port stateChange =
 
 port initialGameState : GameState
 
+port ping : Signal Int
+
 main =
   Signal.map2 render Window.dimensions gameState
 
@@ -262,11 +272,12 @@ type alias GameState =
   , y : Float
   , vx : Float
   , vy : Float
-  , direction: Float
-  , engineRunning: Bool
+  , direction : Float
+  , engineRunning : Bool
   , solarState : Float
   , solarStateDirection : Int
-  , orbitalBodies: List OrbitalBody
+  , orbitalBodies : List OrbitalBody
+  , ping : Int
   }
 
 type alias OrbitalBody =
@@ -280,5 +291,6 @@ type alias Input =
   { fire : Bool
   , turnDirection : Int
   , thrustDirection : Int
+  , ping : Int
   , delta : Time
   }
