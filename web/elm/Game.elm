@@ -25,6 +25,7 @@ render (w, h) gameState =
     -- refactor player, considering multiplay
       -- controll own player-id with local controls?
       -- players [ { x = 1, id = 0 }, ]
+      -- make viewpoint use something like gameState.followedPlayerId? (so you could potentially look at other players point-of-view)
     -- publish control inputs
     -- publish initial and periodical x,y,vx,vy,direction updates
     -- subscribe to other players data updates (periodical updates)
