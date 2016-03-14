@@ -18,9 +18,9 @@ render (w, h) gameState =
   -- todo
 
   -- Multiplayer
-    -- add presence
-      -- get player-id
-      -- set nickname
+    -- add presence (possibly through ping)
+      -- client.playerId
+      -- client.nickname
       -- simple html form to ask for nickname add as query param?
     -- refactor player, considering multiplay
       -- controll own player-id with local controls?

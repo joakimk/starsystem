@@ -1,5 +1,11 @@
 import {Socket} from "phoenix"
 
+let socket = new Socket("/socket", { params: {} })
+socket.connect()
+
+let channel = socket.channel("game", {})
+channel.join()
+
 // Storing gamestate outside of Elm so we can swap out the code and
 // still be in the same state in the game
 window.gameState = {
@@ -14,6 +20,7 @@ window.gameState = {
   ping: 0
 }
 
+// App reloading
 function loadApp()
 {
   var gameElement = document.getElementById("js-game")
@@ -25,12 +32,6 @@ function loadApp()
 
   window.app = app
 }
-
-let socket = new Socket("/socket", { params: {} })
-socket.connect()
-
-let channel = socket.channel("game", {})
-channel.join()
 
 channel.on("updated_code", (data) => {
   console.log("Reloading Elm app (but keeping previous state)")
@@ -49,7 +50,7 @@ channel.on("updated_code", (data) => {
 
 loadApp()
 
-// Get server ping
+// Server ping check
 function ping() {
   channel.push("ping", { timestamp: Date.now() })
 }
