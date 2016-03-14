@@ -15,18 +15,35 @@ render (w, h) gameState =
   -- later: figure out why height dimension does not seem to work
   -- later: remove duplication of height
 
-  -- todo:
-  -- make the ship look in the direction of flight when no inputs are made
-  -- add direction arrows (next to minis of each thing?)
-  -- directionToTheSun rounds the numbers because % can't handle floats, this probably introduces some errors
-  -- figure out a co-ordinate system, size for sun, gravity, etc based on real numbers
-     -- gravity acceleration based on distance
-  -- add planets
-  -- handle multiple inputs at the same time
-  -- add space dust to show movement
-  -- add thruster active animation
-  -- useful for planets and sun, maybe in combination with textures http://elm-lang.org/examples/radial-gradient
-  -- add turn sluggishness, starting and stopping
+  -- todo
+
+  -- Multiplayer
+    -- set up "ping" to server, print on screen
+      -- get player-id
+      -- set nickname
+      -- possibly js-only, push ping, id and nickname into Elm?
+        -- simple html form to ask for nickname
+    -- refactor player, considering multiplay
+      -- controll own player-id with local controls?
+      -- players [ { x = 1, id = 0 }, ]
+    -- publish control inputs
+    -- publish initial and periodical x,y,vx,vy,direction updates
+    -- subscribe to other players data updates (periodical updates)
+    -- subscribe to other players control inputs (smooth changes)
+
+  -- Gameplay: environment
+    -- gravity acceleration based on distance/mass?
+    -- handle multiple inputs at the same time
+    -- add space dust to show movement
+    -- add planets
+    -- add turn sluggishness, starting and stopping
+    -- add direction arrows (next to minis of each thing?)
+    -- make the ship look in the direction of flight when no inputs are made
+    -- directionToTheSun rounds the numbers because % can't handle floats, this probably introduces some errors
+    -- NPCs?
+
+  -- Gameplay: actions
+    -- Shooting, racing, missions? :)
 
   collage 800 800 [
     renderBackground (w, h) gameState
