@@ -16,7 +16,8 @@ config :starsystem, Starsystem.Endpoint,
   url: [host: "example.com", port: 80],
   cache_static_manifest: "priv/static/manifest.json",
   secret_key_base: {:system, "SECRET_KEY_BASE"},
-  check_origin: [ "https://starsystemgame.herokuapp.com" ]
+  check_origin: [ "https://starsystemgame.herokuapp.com" ],
+  force_ssl: [host: "starsystemgame.herokuapp.com"]
 
 # Do not print debug messages in production
 config :logger, level: :info
