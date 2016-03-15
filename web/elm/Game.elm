@@ -24,16 +24,23 @@ render (w, h) gameState =
   -- Multiplayer
     -- add presence (possibly through ping)
       -- simple html form to ask for nickname add as query param?
-    -- publish control inputs
-    -- publish initial and periodical x,y,vx,vy,direction updates
-    -- subscribe to other players data updates (periodical updates)
-    -- subscribe to other players control inputs (smooth changes)
+
+    -- basic
+      -- add port to add/update a player, test manually
+      -- add port to remove a player
+      -- publish initial and periodical x,y,vx,vy,direction updates on control inputs
+      -- subscribe to other players data updates
+
+    -- better?
+      -- publish control inputs
+      -- subscribe to other players control inputs (smooth changes)
 
   -- Gameplay: environment
     -- gravity acceleration based on distance/mass?
     -- handle multiple inputs at the same time
     -- add space dust to show movement
     -- add planets
+      -- use textures, orient them to have the bright side facing the sun?
     -- add turn sluggishness, starting and stopping
     -- add direction arrows (next to minis of each thing?)
     -- make the ship look in the direction of flight when no inputs are made
