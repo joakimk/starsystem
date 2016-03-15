@@ -12,6 +12,10 @@ import Window
 
 render : (Int, Int) -> GameState -> Element
 render (w, h) gameState =
+  -- this could be any player we want to view the world as
+  let
+    viewPointPlayer = gameState.player
+  in
   -- later: figure out why height dimension does not seem to work
   -- later: remove duplication of height
 
@@ -46,15 +50,24 @@ render (w, h) gameState =
     -- Shooting, racing, missions? :)
 
   collage 800 800 [
-    renderBackground (w, h) gameState
+    renderBackground (w, h) (gameState, viewPointPlayer)
   , renderPing gameState
-  , renderOrbitalBodies gameState
-  , renderDirectionIndicators gameState.player
-  , renderShip gameState.player
+  , renderOrbitalBodies (gameState, viewPointPlayer)
+  , renderDirectionIndicators viewPointPlayer
+  , renderShips viewPointPlayer gameState
   ]
 
-renderOrbitalBodies gameState =
-  (List.map (renderOrbitalBody gameState.player) gameState.orbitalBodies)
+renderShips viewPointPlayer gameState =
+  let player = gameState.player
+  in
+    [
+      renderShip viewPointPlayer gameState.player -- todo: read from array of players
+    --, renderShip viewPointPlayer ({ player | y = viewPointPlayer.y - 100, engineRunning = True })
+    ]
+    |> group
+
+renderOrbitalBodies (gameState, player) =
+  (List.map (renderOrbitalBody player) gameState.orbitalBodies)
   |> group
 
 renderOrbitalBody : Player -> OrbitalBody -> Form
@@ -70,7 +83,7 @@ renderOrbitalBody player orbitalBody =
     gradient color (circle orbitalBody.size)
     |> move (orbitalBody.x + player.x, orbitalBody.y + player.y)
 
-renderBackground (w, h) gameState =
+renderBackground (w, h) (gameState, player) =
   let
     color =
       radial (0,0) 50 (0,10) 280
@@ -83,7 +96,7 @@ renderBackground (w, h) gameState =
       square 800
       |> filled black
     , gradient color (circle 300)
-      |> move (gameState.player.x, gameState.player.y)
+      |> move (player.x, player.y)
     --, renderSpaceDust gameState
     ]
     |> toForm
@@ -124,13 +137,20 @@ renderSpaceDust player =
   ]
   |> group
 
-renderShip player =
+renderShip viewPointPlayer player =
   let
     texture = if player.engineRunning then "ship_on" else "ship_off"
+    renderedShip = image 50 80 ("/images/" ++ texture ++ ".png")
+      |> toForm
+      |> rotate (degrees player.direction)
   in
-    image 50 80 ("/images/" ++ texture ++ ".png")
-    |> toForm
-    |> rotate (degrees player.direction)
+    if viewPointPlayer == player then
+       renderedShip
+    else
+      -- NOTE: untested logic, no multiplayer support yet
+      renderedShip
+      |> move (player.x - viewPointPlayer.x, player.y - viewPointPlayer.y)
+
 
 renderText (x, y) text =
   Text.fromString text
