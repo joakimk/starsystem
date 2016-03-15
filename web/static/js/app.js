@@ -11,20 +11,22 @@ channel.join()
 window.gameState = {
   players: [
     {
-      x: 400, y: 100,
+      id: 1,
+      x: 500, y: 200,
       vx: 0, vy: -70,
       direction: 300,
       engineRunning: false,
-      id: 1
+      nickname: "Player"
     },
 
     // NPC :)
     {
-      x: 300, y: 100,
+      id: 2,
+      x: 320, y: 150,
       vx: 0, vy: -70,
       direction: 300,
       engineRunning: false,
-      id: 2
+      nickname: "NPC"
     },
   ],
   playerId: 1,

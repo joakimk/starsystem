@@ -23,13 +23,7 @@ render (w, h) gameState =
 
   -- Multiplayer
     -- add presence (possibly through ping)
-      -- client.playerId
-      -- client.nickname
       -- simple html form to ask for nickname add as query param?
-    -- refactor player, considering multiplay
-      -- controll own player-id with local controls?
-      -- players [ { x = 1, id = 0 }, ]
-      -- make viewpoint use something like gameState.followedPlayerId? (so you could potentially look at other players point-of-view)
     -- publish control inputs
     -- publish initial and periodical x,y,vx,vy,direction updates
     -- subscribe to other players data updates (periodical updates)
@@ -135,9 +129,19 @@ renderSpaceDust player =
 renderShip viewPointPlayer player =
   let
     texture = if player.engineRunning then "ship_on" else "ship_off"
-    renderedShip = image 50 80 ("/images/" ++ texture ++ ".png")
-      |> toForm
-      |> rotate (degrees player.direction)
+    renderedShip = [
+        image 50 80 ("/images/" ++ texture ++ ".png")
+        |> toForm
+        |> rotate (degrees player.direction)
+      , Text.fromString player.nickname
+        |> Text.height 11
+        |> Text.color white
+        |> Text.monospace
+        |> rightAligned
+        |> toForm
+        |> move (0.0, 50.0)
+      ]
+      |> group
   in
     if viewPointPlayer == player then
        renderedShip
@@ -284,7 +288,7 @@ updatePlayer id gameState callback =
 findPlayer gameState id =
   List.filter (\player -> player.id == id) gameState.players
   |> List.head
-  |> Maybe.withDefault { x = 0, y = 0, vx = 0, vy = 0, direction = 0, engineRunning = False, id = -1 }
+  |> Maybe.withDefault { x = 0, y = 0, vx = 0, vy = 0, direction = 0, engineRunning = False, id = -1, nickname = "" }
 
 playerIsChangingSpeedOrDirection input =
   input.turnDirection /= 0 || input.thrustDirection /= 0
@@ -365,6 +369,7 @@ type alias Player =
   , direction : Float
   , engineRunning : Bool
   , id : Int
+  , nickname : String
   }
 
 type alias OrbitalBody =
