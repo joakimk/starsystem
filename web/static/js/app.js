@@ -12,6 +12,11 @@ window.gameState = {
   x: 400, y: 100,
   vx: 0, vy: -70,
   direction: 300,
+  player: {
+    x: 400, y: 100,
+    vx: 0, vy: -70,
+    direction: 300,
+  },
   engineRunning: false,
   solarState: 0, solarStateDirection: 0,
   orbitalBodies: [

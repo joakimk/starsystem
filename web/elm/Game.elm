@@ -175,29 +175,28 @@ applyInputs input gameState =
     degreesPerSecond = (360 * input.delta) / 2
   in
     if input.turnDirection == 1 then
-      { gameState | direction = (normalizeDirection gameState.direction - degreesPerSecond)}
+      (gameState, gameState.player) |> updateDirection (normalizeDirection gameState.player.direction - degreesPerSecond)
     else if input.turnDirection == -1 then
-      { gameState | direction = (normalizeDirection gameState.direction + degreesPerSecond)}
+      (gameState, gameState.player) |> updateDirection (normalizeDirection gameState.player.direction + degreesPerSecond)
     else if input.thrustDirection == 1 then
-      { gameState |
-        vy = gameState.vy - 20 * (gameState.direction |> degrees |> cos) * input.delta
-      , vx = gameState.vx + 20 * (gameState.direction |> degrees |> sin) * input.delta
-      , engineRunning = True
-      }
+      ({ gameState | engineRunning = True }, gameState.player) |> updateVelocity (
+        gameState.vx + 20 * (gameState.direction |> degrees |> sin) * input.delta
+      , gameState.vy - 20 * (gameState.direction |> degrees |> cos) * input.delta
+      )
     else
       { gameState | engineRunning = False }
 
 applyMovement input gameState =
-  { gameState |
-    y = gameState.y + gameState.vy * input.delta
-  , x = gameState.x + gameState.vx * input.delta
-  }
+  (gameState, gameState.player) |> updatePosition (
+    gameState.x + gameState.vx * input.delta
+  , gameState.y + gameState.vy * input.delta
+  )
 
 applySolarGravity input gameState =
-  { gameState |
-    vy = gameState.vy - 10 * (gameState |> directionToTheSun |> degrees |> cos) * input.delta
-  , vx = gameState.vx + 10 * (gameState |> directionToTheSun |> degrees |> sin) * input.delta
-  }
+  (gameState, gameState.player) |> updateVelocity (
+    gameState.vx + 10 * (gameState |> directionToTheSun |> degrees |> sin) * input.delta
+  , gameState.vy - 10 * (gameState |> directionToTheSun |> degrees |> cos) * input.delta
+  )
 
 applyLookingAtSun input gameState =
   let
@@ -206,9 +205,32 @@ applyLookingAtSun input gameState =
     if playerIsChangingSpeedOrDirection input then
       gameState
     else
-      { gameState |
-        direction = (normalizeDirection newDirection)
-      }
+      (gameState, gameState.player) |> updateDirection (normalizeDirection newDirection)
+
+-- As elm lacks tools to update nested data structures without using complex lambdas,
+-- and we only need to update a few fields, here are some helpers.
+-- Also, these take player so we can later calculate multiple local or remote players.
+updateDirection direction (gameState, player) =
+  { gameState | player = { player | direction = direction }, direction = direction }
+
+updateVelocity (vx, vy) (gameState, player) =
+  { gameState | player = { player | vx = vx, vy = vy }, vx = vx, vy = vy }
+
+updatePosition (x, y) (gameState, player) =
+  { gameState | player = { player | x = x, y = y }, x = x, y = y }
+
+updateLocalPlayer callback gameState =
+  let
+    player = (callback gameState.player)
+  in
+    { gameState |
+      player = player
+    --, x = player.x
+    --, y = player.y
+    --, vx = player.vx
+    --, vy = player.vy
+    , direction = player.direction
+    }
 
 playerIsChangingSpeedOrDirection input =
   input.turnDirection /= 0 || input.thrustDirection /= 0
@@ -274,11 +296,23 @@ type alias GameState =
   , vx : Float
   , vy : Float
   , direction : Float
+
+  -- ^^ the above will soon be inside:
+  , player : Player
+
   , engineRunning : Bool
   , solarState : Float
   , solarStateDirection : Int
   , orbitalBodies : List OrbitalBody
   , ping : Int
+  }
+
+type alias Player =
+  { x : Float
+  , y : Float
+  , vx : Float
+  , vy : Float
+  , direction : Float
   }
 
 type alias OrbitalBody =
