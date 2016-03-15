@@ -9,9 +9,6 @@ channel.join()
 // Storing gamestate outside of Elm so we can swap out the code and
 // still be in the same state in the game
 window.gameState = {
-  x: 400, y: 100,
-  vx: 0, vy: -70,
-  direction: 300,
   player: {
     x: 400, y: 100,
     vx: 0, vy: -70,

@@ -96,8 +96,8 @@ applySolarStateFrom gameState number =
 
 renderDirectionIndicators gameState =
   let
-    sunDirection = directionToTheSun gameState
-    sunDistance = distanceTo (0, 0) gameState
+    sunDirection = directionToTheSun gameState.player
+    sunDistance = distanceTo (0, 0) gameState.player
     sunDv = (gameState.player.vx |> round |> abs) + (gameState.player.vy |> round |> abs)
     -- better indicator:
     -- where is the intersection with edge of screen?
@@ -211,26 +211,13 @@ applyLookingAtSun input gameState =
 -- and we only need to update a few fields, here are some helpers.
 -- Also, these take player so we can later calculate multiple local or remote players.
 updateDirection direction (gameState, player) =
-  { gameState | player = { player | direction = direction }, direction = direction }
+  { gameState | player = { player | direction = direction } }
 
 updateVelocity (vx, vy) (gameState, player) =
-  { gameState | player = { player | vx = vx, vy = vy }, vx = vx, vy = vy }
+  { gameState | player = { player | vx = vx, vy = vy } }
 
 updatePosition (x, y) (gameState, player) =
-  { gameState | player = { player | x = x, y = y }, x = x, y = y }
-
-updateLocalPlayer callback gameState =
-  let
-    player = (callback gameState.player)
-  in
-    { gameState |
-      player = player
-    --, x = player.x
-    --, y = player.y
-    --, vx = player.vx
-    --, vy = player.vy
-    , direction = player.direction
-    }
+  { gameState | player = { player | x = x, y = y } }
 
 playerIsChangingSpeedOrDirection input =
   input.turnDirection /= 0 || input.thrustDirection /= 0
@@ -291,16 +278,10 @@ main =
   Signal.map2 render Window.dimensions gameState
 
 type alias GameState =
-  { x : Float
-  , y : Float
-  , vx : Float
-  , vy : Float
-  , direction : Float
+  {
+    player : Player
+  , engineRunning : Bool -- todo: move to player
 
-  -- ^^ the above will soon be inside:
-  , player : Player
-
-  , engineRunning : Bool
   , solarState : Float
   , solarStateDirection : Int
   , orbitalBodies : List OrbitalBody
