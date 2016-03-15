@@ -144,8 +144,7 @@ renderShip viewPointPlayer player =
     else
       -- NOTE: untested logic, no multiplayer support yet
       renderedShip
-      |> move (player.x - viewPointPlayer.x, player.y - viewPointPlayer.y)
-
+      |> move (viewPointPlayer.x - player.x, viewPointPlayer.y - player.y)
 
 renderText (x, y) text =
   Text.fromString text
@@ -161,17 +160,25 @@ renderText (x, y) text =
 
 update : Input -> GameState -> GameState
 update input gameState =
-  let newGameState = gameState |> updateWorld input
+  let newGameState = gameState |> updateLocal input
   in
-    (newGameState, (localPlayer gameState))
-    |> updatePlayerPhysics input
-    |> updateLocalPlayer input
+    List.foldr genericPlayerUpdate (newGameState, input) newGameState.players
     |> onlyGameState
 
-updateWorld input gameState =
+genericPlayerUpdate player (gameState, input) =
+  (gameState, player)
+  |> updatePlayerPhysics input
+  |> onlyGameState
+  |> addInput input
+
+addInput input gameState =
+  (gameState, input)
+
+updateLocal input gameState =
   gameState
   |> updatePing input
   |> changeSolarState input
+  |> updateLocalPlayer input
 
 updatePlayerPhysics input (gameState, player) =
   (gameState, player)
@@ -179,9 +186,10 @@ updatePlayerPhysics input (gameState, player) =
   |> updateLookingAtSun input
   |> updateMovement input
 
-updateLocalPlayer input (gameState, player) =
-  (gameState, player)
+updateLocalPlayer input gameState =
+  (gameState, (localPlayer gameState))
   |> updateInputs input
+  |> onlyGameState
 
 onlyGameState (gameState, player) =
   gameState
@@ -242,7 +250,7 @@ updateLookingAtSun input (gameState, player) =
   let
     newDirection = player.direction - ((player.direction - (directionToTheSun player)) * 0.5 * input.delta)
   in
-    if playerIsChangingSpeedOrDirection input then
+    if player.id == (localPlayer gameState).id && playerIsChangingSpeedOrDirection input then
       (gameState, player)
     else
       (gameState, player) |> updateDirection (normalizeDirection newDirection)

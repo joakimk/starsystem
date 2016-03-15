@@ -17,6 +17,15 @@ window.gameState = {
       engineRunning: false,
       id: 1
     },
+
+    // NPC :)
+    {
+      x: 300, y: 100,
+      vx: 0, vy: -70,
+      direction: 300,
+      engineRunning: false,
+      id: 2
+    },
   ],
   playerId: 1,
   solarState: 0, solarStateDirection: 0,
