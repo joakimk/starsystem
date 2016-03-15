@@ -48,16 +48,17 @@ render (w, h) gameState =
   collage 800 800 [
     renderBackground (w, h) gameState
   , renderPing gameState
-  , renderDirectionIndicators gameState
+  , renderDirectionIndicators gameState.player
   , renderOrbitalBodies gameState
   , renderShip gameState
   ]
 
 renderOrbitalBodies gameState =
-  (List.map (renderOrbitalBody gameState) gameState.orbitalBodies)
+  (List.map (renderOrbitalBody gameState.player) gameState.orbitalBodies)
   |> group
 
-renderOrbitalBody gameState orbitalBody =
+renderOrbitalBody : Player -> OrbitalBody -> Form
+renderOrbitalBody player orbitalBody =
   let
     color =
       radial (0,0) 50 (0, 10) (orbitalBody.size * 0.95)
@@ -67,7 +68,7 @@ renderOrbitalBody gameState orbitalBody =
         ]
   in
     gradient color (circle orbitalBody.size)
-    |> move (orbitalBody.x + gameState.player.x, orbitalBody.y + gameState.player.y)
+    |> move (orbitalBody.x + player.x, orbitalBody.y + player.y)
 
 renderBackground (w, h) gameState =
   let
@@ -94,11 +95,12 @@ applySolarStateFrom gameState number =
   number * gameState.solarState
   |> round
 
-renderDirectionIndicators gameState =
+renderDirectionIndicators : Player -> Form
+renderDirectionIndicators player =
   let
-    sunDirection = directionToTheSun gameState.player
-    sunDistance = distanceTo (0, 0) gameState.player
-    sunDv = (gameState.player.vx |> round |> abs) + (gameState.player.vy |> round |> abs)
+    sunDirection = directionToTheSun player
+    sunDistance = distanceTo (0, 0) player
+    sunDv = (player.vx |> round |> abs) + (player.vy |> round |> abs)
     -- better indicator:
     -- where is the intersection with edge of screen?
     -- or: show arrow?
@@ -106,18 +108,19 @@ renderDirectionIndicators gameState =
   in
     if sunDistance > 650 then
       [ renderText (0, 280) text
-      , renderText (0, 280 - 16) ("Your direction: " ++ (gameState.player.direction |> round |> toString))
+      , renderText (0, 280 - 16) ("Your direction: " ++ (player.direction |> round |> toString))
      ]
      |> group
     else
       -- todo: render nothing
-      renderSpaceDust gameState
+      renderSpaceDust player
 
-renderSpaceDust gameState =
+renderSpaceDust : Player -> Form
+renderSpaceDust player =
   [
     circle 1
     |> filled gray
-    |> move (100 + gameState.player.x, 85 + gameState.player.y)
+    |> move (100 + player.x, 85 + player.y)
   ]
   |> group
 
