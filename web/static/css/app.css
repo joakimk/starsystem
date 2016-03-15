@@ -9,3 +9,9 @@ body {
   margin-left: auto;
   margin-right: auto;
 }
+
+.docs {
+  background-color: black;
+  padding: 10px;
+  color: gray;
+}
