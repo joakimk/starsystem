@@ -50,7 +50,7 @@ render (w, h) gameState =
   , renderPing gameState
   , renderDirectionIndicators gameState.player
   , renderOrbitalBodies gameState
-  , renderShip gameState
+  , renderShip gameState.player
   ]
 
 renderOrbitalBodies gameState =
@@ -124,13 +124,13 @@ renderSpaceDust player =
   ]
   |> group
 
-renderShip gameState =
+renderShip player =
   let
-    texture = if gameState.player.engineRunning then "ship_on" else "ship_off"
+    texture = if player.engineRunning then "ship_on" else "ship_off"
   in
     image 50 80 ("/images/" ++ texture ++ ".png")
     |> toForm
-    |> rotate (degrees gameState.player.direction)
+    |> rotate (degrees player.direction)
 
 renderText (x, y) text =
   Text.fromString text
