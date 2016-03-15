@@ -146,29 +146,30 @@ renderText (x, y) text =
 
 update : Input -> GameState -> GameState
 update input gameState =
-  gameState
-  |> updateWorld input
-  |> updatePlayerPhysics input
-  |> updateLocalPlayer input
+  let newGameState = gameState |> updateWorld input
+  in
+    (newGameState, gameState.player)
+    |> updatePlayerPhysics input
+    |> updateLocalPlayer input
+    |> onlyGameState
 
 updateWorld input gameState =
   gameState
   |> updatePing input
   |> changeSolarState input
 
-updateLocalPlayer input gameState =
-  let player = gameState.player in
+updatePlayerPhysics input (gameState, player) =
+  (gameState, player)
+  |> updateSolarGravity input
+  |> updateLookingAtSun input
+  |> updateMovement input
 
+updateLocalPlayer input (gameState, player) =
+  (gameState, player)
+  |> updateInputs input
+
+onlyGameState (gameState, player) =
   gameState
-  |> updateInputs input player
-
-updatePlayerPhysics input gameState =
-  let player = gameState.player in
-
-  gameState
-  |> updateSolarGravity input player
-  |> updateLookingAtSun input player
-  |> updateMovement input player
 
 updatePing input gameState =
   { gameState | ping = input.ping }
@@ -189,7 +190,7 @@ changeSolarState input gameState =
         solarState = gameState.solarState - 0.5 * input.delta
       }
 
-updateInputs input player gameState =
+updateInputs input (gameState, player) =
   let
     degreesPerSecond = (360 * input.delta) / 2
   in
@@ -209,26 +210,25 @@ updateInputs input player gameState =
     else
       (gameState, player)
       |> updateEngineRunning False
-      |> onlyGameState
 
-updateMovement input player gameState =
+updateMovement input (gameState, player) =
   (gameState, player) |> updatePosition (
     player.x + player.vx * input.delta
   , player.y + player.vy * input.delta
   )
 
-updateSolarGravity input player gameState =
+updateSolarGravity input (gameState, player) =
   (gameState, player) |> updateVelocity (
     player.vx + 10 * (player |> directionToTheSun |> degrees |> sin) * input.delta
   , player.vy - 10 * (player |> directionToTheSun |> degrees |> cos) * input.delta
   )
 
-updateLookingAtSun input player gameState =
+updateLookingAtSun input (gameState, player) =
   let
     newDirection = player.direction - ((player.direction - (directionToTheSun player)) * 0.5 * input.delta)
   in
     if playerIsChangingSpeedOrDirection input then
-      gameState
+      (gameState, player)
     else
       (gameState, player) |> updateDirection (normalizeDirection newDirection)
 
@@ -236,22 +236,20 @@ updateLookingAtSun input player gameState =
 -- and we only need to update a few fields, here are some helpers.
 -- Also, these take player so we can later calculate multiple local or remote players.
 updateDirection direction (gameState, player) =
-  { gameState | player = { player | direction = direction } }
+  let newPlayer = { player | direction = direction }
+  in ({ gameState | player = newPlayer }, newPlayer)
 
 updateVelocity (vx, vy) (gameState, player) =
-  { gameState | player = { player | vx = vx, vy = vy } }
+  let newPlayer = { player | vx = vx, vy = vy }
+  in ({ gameState | player = newPlayer }, newPlayer)
 
 updatePosition (x, y) (gameState, player) =
-  { gameState | player = { player | x = x, y = y } }
+  let newPlayer = { player | x = x, y = y }
+  in ({ gameState | player = newPlayer }, newPlayer)
 
 updateEngineRunning engineRunning (gameState, player) =
-  let
-    newGameState = { gameState | player = { player | engineRunning = engineRunning } }
-  in
-    (newGameState, newGameState.player)
-
-onlyGameState (gameState, player) =
-  gameState
+  let newPlayer = { player | engineRunning = engineRunning }
+  in ({ gameState | player = newPlayer }, newPlayer)
 
 playerIsChangingSpeedOrDirection input =
   input.turnDirection /= 0 || input.thrustDirection /= 0
