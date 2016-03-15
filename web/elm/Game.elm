@@ -67,7 +67,7 @@ renderOrbitalBody gameState orbitalBody =
         ]
   in
     gradient color (circle orbitalBody.size)
-    |> move (orbitalBody.x + gameState.x, orbitalBody.y + gameState.y)
+    |> move (orbitalBody.x + gameState.player.x, orbitalBody.y + gameState.player.y)
 
 renderBackground (w, h) gameState =
   let
@@ -82,7 +82,7 @@ renderBackground (w, h) gameState =
       square 800
       |> filled black
     , gradient color (circle 300)
-      |> move (gameState.x, gameState.y)
+      |> move (gameState.player.x, gameState.player.y)
     --, renderSpaceDust gameState
     ]
     |> toForm
@@ -98,7 +98,7 @@ renderDirectionIndicators gameState =
   let
     sunDirection = directionToTheSun gameState
     sunDistance = distanceTo (0, 0) gameState
-    sunDv = (gameState.vx |> round |> abs) + (gameState.vy |> round |> abs)
+    sunDv = (gameState.player.vx |> round |> abs) + (gameState.player.vy |> round |> abs)
     -- better indicator:
     -- where is the intersection with edge of screen?
     -- or: show arrow?
@@ -106,7 +106,7 @@ renderDirectionIndicators gameState =
   in
     if sunDistance > 650 then
       [ renderText (0, 280) text
-      , renderText (0, 280 - 16) ("Your direction: " ++ (gameState.direction |> round |> toString))
+      , renderText (0, 280 - 16) ("Your direction: " ++ (gameState.player.direction |> round |> toString))
      ]
      |> group
     else
@@ -117,7 +117,7 @@ renderSpaceDust gameState =
   [
     circle 1
     |> filled gray
-    |> move (100 + gameState.x, 85 + gameState.y)
+    |> move (100 + gameState.player.x, 85 + gameState.player.y)
   ]
   |> group
 
@@ -127,7 +127,7 @@ renderShip gameState =
   in
     image 50 80 ("/images/" ++ texture ++ ".png")
     |> toForm
-    |> rotate (degrees gameState.direction)
+    |> rotate (degrees gameState.player.direction)
 
 renderText (x, y) text =
   Text.fromString text
@@ -180,27 +180,27 @@ applyInputs input gameState =
       (gameState, gameState.player) |> updateDirection (normalizeDirection gameState.player.direction + degreesPerSecond)
     else if input.thrustDirection == 1 then
       ({ gameState | engineRunning = True }, gameState.player) |> updateVelocity (
-        gameState.vx + 20 * (gameState.direction |> degrees |> sin) * input.delta
-      , gameState.vy - 20 * (gameState.direction |> degrees |> cos) * input.delta
+        gameState.player.vx + 20 * (gameState.player.direction |> degrees |> sin) * input.delta
+      , gameState.player.vy - 20 * (gameState.player.direction |> degrees |> cos) * input.delta
       )
     else
       { gameState | engineRunning = False }
 
 applyMovement input gameState =
   (gameState, gameState.player) |> updatePosition (
-    gameState.x + gameState.vx * input.delta
-  , gameState.y + gameState.vy * input.delta
+    gameState.player.x + gameState.player.vx * input.delta
+  , gameState.player.y + gameState.player.vy * input.delta
   )
 
 applySolarGravity input gameState =
   (gameState, gameState.player) |> updateVelocity (
-    gameState.vx + 10 * (gameState |> directionToTheSun |> degrees |> sin) * input.delta
-  , gameState.vy - 10 * (gameState |> directionToTheSun |> degrees |> cos) * input.delta
+    gameState.player.vx + 10 * (gameState.player |> directionToTheSun |> degrees |> sin) * input.delta
+  , gameState.player.vy - 10 * (gameState.player |> directionToTheSun |> degrees |> cos) * input.delta
   )
 
 applyLookingAtSun input gameState =
   let
-    newDirection = gameState.direction - ((gameState.direction - (directionToTheSun gameState)) * 0.5 * input.delta)
+    newDirection = gameState.player.direction - ((gameState.player.direction - (directionToTheSun gameState.player)) * 0.5 * input.delta)
   in
     if playerIsChangingSpeedOrDirection input then
       gameState
@@ -235,18 +235,18 @@ updateLocalPlayer callback gameState =
 playerIsChangingSpeedOrDirection input =
   input.turnDirection /= 0 || input.thrustDirection /= 0
 
-directionToTheSun gameState =
+directionToTheSun player =
   let
-    temp = (360 - (180 / pi) * (atan2 gameState.x  gameState.y)) |> round
+    temp = (360 - (180 / pi) * (atan2 player.x player.y)) |> round
   in
     (temp % 360) |> normalizeDirection
 
 -- Generic maths
 
-distanceTo (targetX, targetY) gameState =
+distanceTo (targetX, targetY) player =
   let
-    xDiff = targetX - gameState.x
-    yDiff = targetY - gameState.y
+    xDiff = targetX - player.x
+    yDiff = targetY - player.y
   in
     sqrt (xDiff^2 + yDiff^2)
 
