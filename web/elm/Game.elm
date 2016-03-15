@@ -182,8 +182,8 @@ applyInputs input gameState =
     else if input.turnDirection == -1 then
       (gameState, gameState.player) |> updateDirection (normalizeDirection gameState.player.direction + degreesPerSecond)
     else if input.thrustDirection == 1 then
-      ((gameState, gameState.player) |> updateEngineRunning True, gameState.player)
-      |> updateVelocity (
+      let gameState = (gameState, gameState.player) |> updateEngineRunning True
+      in (gameState, gameState.player) |> updateVelocity (
         gameState.player.vx + 20 * (gameState.player.direction |> degrees |> sin) * input.delta
       , gameState.player.vy - 20 * (gameState.player.direction |> degrees |> cos) * input.delta
       )
