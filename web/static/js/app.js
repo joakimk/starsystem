@@ -13,8 +13,8 @@ window.gameState = {
     x: 400, y: 100,
     vx: 0, vy: -70,
     direction: 300,
+    engineRunning: false,
   },
-  engineRunning: false,
   solarState: 0, solarStateDirection: 0,
   orbitalBodies: [
     { x: -500, y: 350, size: 100, gravity: 5 }

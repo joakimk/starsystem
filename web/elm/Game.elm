@@ -126,7 +126,7 @@ renderSpaceDust player =
 
 renderShip gameState =
   let
-    texture = if gameState.engineRunning then "ship_on" else "ship_off"
+    texture = if gameState.player.engineRunning then "ship_on" else "ship_off"
   in
     image 50 80 ("/images/" ++ texture ++ ".png")
     |> toForm
@@ -182,12 +182,14 @@ applyInputs input gameState =
     else if input.turnDirection == -1 then
       (gameState, gameState.player) |> updateDirection (normalizeDirection gameState.player.direction + degreesPerSecond)
     else if input.thrustDirection == 1 then
-      ({ gameState | engineRunning = True }, gameState.player) |> updateVelocity (
+      ((gameState, gameState.player) |> updateEngineRunning True, gameState.player)
+      |> updateVelocity (
         gameState.player.vx + 20 * (gameState.player.direction |> degrees |> sin) * input.delta
       , gameState.player.vy - 20 * (gameState.player.direction |> degrees |> cos) * input.delta
       )
     else
-      { gameState | engineRunning = False }
+      (gameState, gameState.player)
+      |> updateEngineRunning False
 
 applyMovement input gameState =
   (gameState, gameState.player) |> updatePosition (
@@ -221,6 +223,9 @@ updateVelocity (vx, vy) (gameState, player) =
 
 updatePosition (x, y) (gameState, player) =
   { gameState | player = { player | x = x, y = y } }
+
+updateEngineRunning engineRunning (gameState, player) =
+  { gameState | player = { player | engineRunning = engineRunning } }
 
 playerIsChangingSpeedOrDirection input =
   input.turnDirection /= 0 || input.thrustDirection /= 0
@@ -283,7 +288,6 @@ main =
 type alias GameState =
   {
     player : Player
-  , engineRunning : Bool -- todo: move to player
 
   , solarState : Float
   , solarStateDirection : Int
@@ -297,6 +301,7 @@ type alias Player =
   , vx : Float
   , vy : Float
   , direction : Float
+  , engineRunning : Bool
   }
 
 type alias OrbitalBody =
