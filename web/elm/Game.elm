@@ -48,8 +48,8 @@ render (w, h) gameState =
   collage 800 800 [
     renderBackground (w, h) gameState
   , renderPing gameState
-  , renderDirectionIndicators gameState.player
   , renderOrbitalBodies gameState
+  , renderDirectionIndicators gameState.player
   , renderShip gameState.player
   ]
 
@@ -74,9 +74,9 @@ renderBackground (w, h) gameState =
   let
     color =
       radial (0,0) 50 (0,10) 280
-        [ (  0, rgb  244 (180 + (75 |> applySolarStateFrom gameState)) 1)
+        [ (  0, rgb  244 (180 + (75 |> updateSolarStateFrom gameState)) 1)
         , (0.8, rgb  228 200 100)
-        , (  1, rgba 128 (100 |> applySolarStateFrom gameState) 100 0)
+        , (  1, rgba 128 (100 |> updateSolarStateFrom gameState) 100 0)
         ]
   in
     collage w 800 [
@@ -91,7 +91,7 @@ renderBackground (w, h) gameState =
 renderPing gameState =
   renderText (330, 380) ("ping: " ++ (toString gameState.ping))
 
-applySolarStateFrom gameState number =
+updateSolarStateFrom gameState number =
   number * gameState.solarState
   |> round
 
@@ -147,14 +147,30 @@ renderText (x, y) text =
 update : Input -> GameState -> GameState
 update input gameState =
   gameState
-  |> applyPing input
-  |> applyInputs input
-  |> applyMovement input
-  |> applySolarGravity input
-  |> changeSolarState input
-  |> applyLookingAtSun input
+  |> updateWorld input
+  |> updatePlayerPhysics input
+  |> updateLocalPlayer input
 
-applyPing input gameState =
+updateWorld input gameState =
+  gameState
+  |> updatePing input
+  |> changeSolarState input
+
+updateLocalPlayer input gameState =
+  let player = gameState.player in
+
+  gameState
+  |> updateInputs input player
+
+updatePlayerPhysics input gameState =
+  let player = gameState.player in
+
+  gameState
+  |> updateSolarGravity input player
+  |> updateLookingAtSun input player
+  |> updateMovement input player
+
+updatePing input gameState =
   { gameState | ping = input.ping }
 
 changeSolarState input gameState =
@@ -173,44 +189,48 @@ changeSolarState input gameState =
         solarState = gameState.solarState - 0.5 * input.delta
       }
 
-applyInputs input gameState =
+updateInputs input player gameState =
   let
     degreesPerSecond = (360 * input.delta) / 2
   in
     if input.turnDirection == 1 then
-      (gameState, gameState.player) |> updateDirection (normalizeDirection gameState.player.direction - degreesPerSecond)
+      (gameState, player)
+      |> updateDirection (normalizeDirection player.direction - degreesPerSecond)
     else if input.turnDirection == -1 then
-      (gameState, gameState.player) |> updateDirection (normalizeDirection gameState.player.direction + degreesPerSecond)
+      (gameState, player)
+      |> updateDirection (normalizeDirection player.direction + degreesPerSecond)
     else if input.thrustDirection == 1 then
-      let gameState = (gameState, gameState.player) |> updateEngineRunning True
-      in (gameState, gameState.player) |> updateVelocity (
-        gameState.player.vx + 20 * (gameState.player.direction |> degrees |> sin) * input.delta
-      , gameState.player.vy - 20 * (gameState.player.direction |> degrees |> cos) * input.delta
+      (gameState, player)
+      |> updateEngineRunning True
+      |> updateVelocity (
+        player.vx + 20 * (player.direction |> degrees |> sin) * input.delta
+      , player.vy - 20 * (player.direction |> degrees |> cos) * input.delta
       )
     else
-      (gameState, gameState.player)
+      (gameState, player)
       |> updateEngineRunning False
+      |> onlyGameState
 
-applyMovement input gameState =
-  (gameState, gameState.player) |> updatePosition (
-    gameState.player.x + gameState.player.vx * input.delta
-  , gameState.player.y + gameState.player.vy * input.delta
+updateMovement input player gameState =
+  (gameState, player) |> updatePosition (
+    player.x + player.vx * input.delta
+  , player.y + player.vy * input.delta
   )
 
-applySolarGravity input gameState =
-  (gameState, gameState.player) |> updateVelocity (
-    gameState.player.vx + 10 * (gameState.player |> directionToTheSun |> degrees |> sin) * input.delta
-  , gameState.player.vy - 10 * (gameState.player |> directionToTheSun |> degrees |> cos) * input.delta
+updateSolarGravity input player gameState =
+  (gameState, player) |> updateVelocity (
+    player.vx + 10 * (player |> directionToTheSun |> degrees |> sin) * input.delta
+  , player.vy - 10 * (player |> directionToTheSun |> degrees |> cos) * input.delta
   )
 
-applyLookingAtSun input gameState =
+updateLookingAtSun input player gameState =
   let
-    newDirection = gameState.player.direction - ((gameState.player.direction - (directionToTheSun gameState.player)) * 0.5 * input.delta)
+    newDirection = player.direction - ((player.direction - (directionToTheSun player)) * 0.5 * input.delta)
   in
     if playerIsChangingSpeedOrDirection input then
       gameState
     else
-      (gameState, gameState.player) |> updateDirection (normalizeDirection newDirection)
+      (gameState, player) |> updateDirection (normalizeDirection newDirection)
 
 -- As elm lacks tools to update nested data structures without using complex lambdas,
 -- and we only need to update a few fields, here are some helpers.
@@ -225,7 +245,13 @@ updatePosition (x, y) (gameState, player) =
   { gameState | player = { player | x = x, y = y } }
 
 updateEngineRunning engineRunning (gameState, player) =
-  { gameState | player = { player | engineRunning = engineRunning } }
+  let
+    newGameState = { gameState | player = { player | engineRunning = engineRunning } }
+  in
+    (newGameState, newGameState.player)
+
+onlyGameState (gameState, player) =
+  gameState
 
 playerIsChangingSpeedOrDirection input =
   input.turnDirection /= 0 || input.thrustDirection /= 0
