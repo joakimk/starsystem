@@ -9,12 +9,16 @@ channel.join()
 // Storing gamestate outside of Elm so we can swap out the code and
 // still be in the same state in the game
 window.gameState = {
-  player: {
-    x: 400, y: 100,
-    vx: 0, vy: -70,
-    direction: 300,
-    engineRunning: false,
-  },
+  players: [
+    {
+      x: 400, y: 100,
+      vx: 0, vy: -70,
+      direction: 300,
+      engineRunning: false,
+      id: 1
+    },
+  ],
+  playerId: 1,
   solarState: 0, solarStateDirection: 0,
   orbitalBodies: [
     { x: -500, y: 350, size: 100, gravity: 5 }

@@ -14,7 +14,7 @@ render : (Int, Int) -> GameState -> Element
 render (w, h) gameState =
   -- this could be any player we want to view the world as
   let
-    viewPointPlayer = gameState.player
+    viewPointPlayer = (localPlayer gameState)
   in
   -- later: figure out why height dimension does not seem to work
   -- later: remove duplication of height
@@ -58,13 +58,8 @@ render (w, h) gameState =
   ]
 
 renderShips viewPointPlayer gameState =
-  let player = gameState.player
-  in
-    [
-      renderShip viewPointPlayer gameState.player -- todo: read from array of players
-    --, renderShip viewPointPlayer ({ player | y = viewPointPlayer.y - 100, engineRunning = True })
-    ]
-    |> group
+  List.map (renderShip viewPointPlayer) gameState.players
+  |> group
 
 renderOrbitalBodies (gameState, player) =
   (List.map (renderOrbitalBody player) gameState.orbitalBodies)
@@ -168,7 +163,7 @@ update : Input -> GameState -> GameState
 update input gameState =
   let newGameState = gameState |> updateWorld input
   in
-    (newGameState, gameState.player)
+    (newGameState, (localPlayer gameState))
     |> updatePlayerPhysics input
     |> updateLocalPlayer input
     |> onlyGameState
@@ -256,20 +251,32 @@ updateLookingAtSun input (gameState, player) =
 -- and we only need to update a few fields, here are some helpers.
 -- Also, these take player so we can later calculate multiple local or remote players.
 updateDirection direction (gameState, player) =
-  let newPlayer = { player | direction = direction }
-  in ({ gameState | player = newPlayer }, newPlayer)
+  updatePlayer player.id gameState (\player -> { player | direction = direction })
 
 updateVelocity (vx, vy) (gameState, player) =
-  let newPlayer = { player | vx = vx, vy = vy }
-  in ({ gameState | player = newPlayer }, newPlayer)
+  updatePlayer player.id gameState (\player -> { player | vx = vx, vy = vy })
 
 updatePosition (x, y) (gameState, player) =
-  let newPlayer = { player | x = x, y = y }
-  in ({ gameState | player = newPlayer }, newPlayer)
+  updatePlayer player.id gameState (\player -> { player | x = x, y = y })
 
 updateEngineRunning engineRunning (gameState, player) =
-  let newPlayer = { player | engineRunning = engineRunning }
-  in ({ gameState | player = newPlayer }, newPlayer)
+  updatePlayer player.id gameState (\player -> { player | engineRunning = engineRunning })
+
+updatePlayer id gameState callback =
+  let
+    updater player =
+      if player.id == id then
+         (callback player)
+      else
+         player
+  in
+    ({ gameState | players = (List.map updater gameState.players) }, (findPlayer gameState id))
+
+-- Finds a player. For now we assume they are always there.
+findPlayer gameState id =
+  List.filter (\player -> player.id == id) gameState.players
+  |> List.head
+  |> Maybe.withDefault { x = 0, y = 0, vx = 0, vy = 0, direction = 0, engineRunning = False, id = -1 }
 
 playerIsChangingSpeedOrDirection input =
   input.turnDirection /= 0 || input.thrustDirection /= 0
@@ -296,6 +303,9 @@ normalizeDirection direction =
      direction + 360
   else
      direction
+
+localPlayer gameState =
+  findPlayer gameState gameState.playerId
 
 -- Support code
 
@@ -331,12 +341,12 @@ main =
 
 type alias GameState =
   {
-    player : Player
-
+    players : List Player
   , solarState : Float
   , solarStateDirection : Int
   , orbitalBodies : List OrbitalBody
   , ping : Int
+  , playerId : Int
   }
 
 type alias Player =
@@ -346,6 +356,7 @@ type alias Player =
   , vy : Float
   , direction : Float
   , engineRunning : Bool
+  , id : Int
   }
 
 type alias OrbitalBody =
