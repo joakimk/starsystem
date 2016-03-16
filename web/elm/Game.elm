@@ -36,6 +36,7 @@ render (w, h) gameState =
       -- subscribe to other players control inputs (smooth changes)
 
   -- Gameplay: environment
+    -- navigation idea: show a list of destinations, highlight the selected, orient the ship towards the selected, and possibly add directional arrow
     -- gravity acceleration based on distance/mass?
     -- handle multiple inputs at the same time
     -- add space dust to show movement
