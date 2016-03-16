@@ -6,12 +6,20 @@ socket.connect()
 let channel = socket.channel("game", {})
 channel.join()
 
+function generateGuid() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+      var r = Math.random() * 16|0;
+      var v = (c == "x" ? r : (r & 0x3|0x8));
+      return v.toString(16);
+  })
+}
+
 // Storing gamestate outside of Elm so we can swap out the code and
 // still be in the same state in the game
 window.gameState = {
   players: [
     {
-      id: 1,
+      id: generateGuid(),
       x: 500, y: 200,
       vx: 0, vy: -70,
       direction: 300,
@@ -21,7 +29,7 @@ window.gameState = {
 
     // NPC :)
     {
-      id: 2,
+      id: generateGuid(),
       x: 320, y: 150,
       vx: 0, vy: -70,
       direction: 300,
@@ -29,13 +37,15 @@ window.gameState = {
       nickname: "NPC"
     },
   ],
-  playerId: 1,
+  playerId: null,
   solarState: 0, solarStateDirection: 0,
   orbitalBodies: [
     { x: -500, y: 350, size: 100, gravity: 5 }
   ],
   ping: 0
 }
+
+window.gameState.playerId = window.gameState.players[0].id
 
 // App reloading
 function loadApp()

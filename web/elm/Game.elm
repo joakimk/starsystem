@@ -27,8 +27,8 @@ render (w, h) gameState =
 
     -- basic
       -- add port to add/update a player, test manually
-      -- add port to remove a player
-      -- publish initial and periodical x,y,vx,vy,direction updates on control inputs
+      -- remove players that hasn't been seen in a set time
+      -- publish x,y,vx,vy,direction updates initially, on control inputs and periodically
       -- subscribe to other players data updates
 
     -- better?
@@ -296,7 +296,7 @@ updatePlayer id gameState callback =
 findPlayer gameState id =
   List.filter (\player -> player.id == id) gameState.players
   |> List.head
-  |> Maybe.withDefault { x = 0, y = 0, vx = 0, vy = 0, direction = 0, engineRunning = False, id = -1, nickname = "" }
+  |> Maybe.withDefault { x = 0, y = 0, vx = 0, vy = 0, direction = 0, engineRunning = False, id = "", nickname = "" }
 
 playerIsChangingSpeedOrDirection input =
   input.turnDirection /= 0 || input.thrustDirection /= 0
@@ -366,7 +366,7 @@ type alias GameState =
   , solarStateDirection : Int
   , orbitalBodies : List OrbitalBody
   , ping : Int
-  , playerId : Int
+  , playerId : String
   }
 
 type alias Player =
@@ -376,7 +376,7 @@ type alias Player =
   , vy : Float
   , direction : Float
   , engineRunning : Bool
-  , id : Int
+  , id : String
   , nickname : String
   }
 
