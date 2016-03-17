@@ -88,10 +88,8 @@ ping()
 app.ports.addOrUpdatePlayer.send(localPlayer)
 
 // Add NPC :)
-var npcId = generateUUID()
-
 app.ports.addOrUpdatePlayer.send({
-  id: npcId,
+  id: generateUUID(),
   x: 320, y: 150,
   vx: 0, vy: -70,
   direction: 300,
