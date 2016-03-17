@@ -42,6 +42,7 @@ render (w, h) gameState =
     -- add space dust to show movement
     -- add planets
       -- use textures, orient them to have the bright side facing the sun?
+      -- use gradients like the sun to provide an atmosphere effect
     -- add turn sluggishness, starting and stopping
     -- add direction arrows (next to minis of each thing?)
     -- make the ship look in the direction of flight when no inputs are made
@@ -172,12 +173,22 @@ renderText (x, y) text =
 
 update : Input -> GameState -> GameState
 update input gameState =
-  let newGameState = gameState |> updateLocal input
-  in
-    List.foldr genericPlayerUpdate (newGameState, input) newGameState.players
-    |> onlyGameState
+  gameState
+  |> updateLocal input
+  |> updateAllPlayers input
 
-genericPlayerUpdate player (gameState, input) =
+updateAllPlayers input gameState =
+  List.foldr updateGlobal (gameState, input) gameState.players
+  |> onlyGameState
+
+updateLocal input gameState =
+  gameState
+  |> updatePing input
+  |> changeSolarState input
+  |> updateLocalPlayer input
+  |> onlyGameState
+
+updateGlobal player (gameState, input) =
   (gameState, player)
   |> updatePlayerPhysics input
   |> onlyGameState
@@ -185,12 +196,6 @@ genericPlayerUpdate player (gameState, input) =
 
 addInput input gameState =
   (gameState, input)
-
-updateLocal input gameState =
-  gameState
-  |> updatePing input
-  |> changeSolarState input
-  |> updateLocalPlayer input
 
 updatePlayerPhysics input (gameState, player) =
   (gameState, player)
@@ -201,7 +206,6 @@ updatePlayerPhysics input (gameState, player) =
 updateLocalPlayer input gameState =
   (gameState, (localPlayer gameState))
   |> updateInputs input
-  |> onlyGameState
 
 onlyGameState (gameState, player) =
   gameState
