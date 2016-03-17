@@ -18,27 +18,8 @@ function generateUUID() {
 // Storing gamestate outside of Elm so we can swap out the code and
 // still be in the same state in the game
 window.gameState = {
-  players: [
-    {
-      id: generateUUID(),
-      x: 500, y: 200,
-      vx: 0, vy: -70,
-      direction: 300,
-      engineRunning: false,
-      nickname: "Player"
-    },
-
-    // NPC :)
-    {
-      id: generateUUID(),
-      x: 320, y: 150,
-      vx: 0, vy: -70,
-      direction: 300,
-      engineRunning: false,
-      nickname: "NPC"
-    },
-  ],
-  playerId: null,
+  players: [],
+  playerId: "none-yet",
   solarState: 0, solarStateDirection: 0,
   orbitalBodies: [
     { x: -500, y: 350, size: 100, gravity: 5 }
@@ -46,13 +27,28 @@ window.gameState = {
   ping: 0
 }
 
-window.gameState.playerId = window.gameState.players[0].id
-
 // App reloading
 function loadApp()
 {
   var gameElement = document.getElementById("js-game")
-  var app = Elm.embed(Elm.Game, gameElement, { initialGameState: window.gameState, ping: 0 })
+  var player = {
+    id: generateUUID(),
+    x: 500, y: 200,
+    vx: 0, vy: -70,
+    direction: 300,
+    engineRunning: false,
+    nickname: "Player"
+  }
+
+  var app = Elm.embed(Elm.Game, gameElement, {
+    initialGameState: window.gameState,
+    ping: 0,
+    // we have to provide a default value for the port, but as it happens at "initialization time", it isn't used in the update loop :(
+    addPlayer: player,
+  })
+
+  // Add the local player
+  app.ports.addPlayer.send(player)
 
   app.ports.stateChange.subscribe((state) => {
     window.gameState = state
@@ -89,3 +85,13 @@ channel.on("pong", (data) => {
 })
 
 ping()
+
+// NPC :)
+app.ports.addPlayer.send({
+  id: generateUUID(),
+  x: 320, y: 150,
+  vx: 0, vy: -70,
+  direction: 300,
+  engineRunning: false,
+  nickname: "NPC"
+})

@@ -171,11 +171,22 @@ renderText (x, y) text =
 
 -- Update
 
-update : Input -> GameState -> GameState
-update input gameState =
-  gameState
-  |> updateLocal input
-  |> updateAllPlayers input
+update : Event -> GameState -> GameState
+update event gameState =
+  case event of
+    NewInput input ->
+      gameState
+      |> updateLocal input
+      |> updateAllPlayers input
+
+    NewPlayer player ->
+      if gameState.players == [] then
+        { gameState | players = [ player ], playerId = player.id }
+      else
+        { gameState | players = (List.concat [ gameState.players, [ player ] ]) }
+
+    UpdatedPing ping ->
+      { gameState | ping = ping }
 
 updateAllPlayers input gameState =
   List.foldr updateGlobal (gameState, input) gameState.players
@@ -183,7 +194,6 @@ updateAllPlayers input gameState =
 
 updateLocal input gameState =
   gameState
-  |> updatePing input
   |> changeSolarState input
   |> updateLocalPlayer input
   |> onlyGameState
@@ -209,9 +219,6 @@ updateLocalPlayer input gameState =
 
 onlyGameState (gameState, player) =
   gameState
-
-updatePing input gameState =
-  { gameState | ping = input.ping }
 
 changeSolarState input gameState =
   if gameState.solarStateDirection == 0 then
@@ -335,16 +342,21 @@ localPlayer gameState =
 
 gameState : Signal GameState
 gameState =
-  Signal.foldp update initialGameState input
+  Signal.foldp update initialGameState events
+
+events : Signal Event
+events =
+  (Signal.map NewInput input)
+  |> Signal.merge (Signal.map NewPlayer addPlayer)
+  |> Signal.merge (Signal.map UpdatedPing ping)
 
 input : Signal Input
 input =
   Signal.sampleOn delta <|
-    Signal.map5 Input
+    Signal.map4 Input
       Keyboard.space -- # fire
       (Signal.map .x Keyboard.wasd) -- turn direction
       (Signal.map .y Keyboard.wasd) -- thrust direction
-      ping
       delta
 
 -- delta corresponds to the amount of change per second,
@@ -360,8 +372,12 @@ port initialGameState : GameState
 
 port ping : Signal Int
 
+port addPlayer : Signal Player
+
 main =
   Signal.map2 render Window.dimensions gameState
+
+type Event = NewInput Input | NewPlayer Player | UpdatedPing Int -- | UpdatedPlayer Player
 
 type alias GameState =
   {
@@ -395,6 +411,5 @@ type alias Input =
   { fire : Bool
   , turnDirection : Int
   , thrustDirection : Int
-  , ping : Int
   , delta : Time
   }
