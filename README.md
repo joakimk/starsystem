@@ -6,7 +6,7 @@ The rough idea is to build a spaceship game where you can move around within a s
 
 When/if there is ever enough game there I hope to add multiplayer through the phoenix server.
 
-**Status:** Basic hot-code-reload setup done. Some basics in place.
+**Status:** Preparing for multiplayer
 
 # Screenshot
 
@@ -25,7 +25,7 @@ When/if there is ever enough game there I hope to add multiplayer through the ph
 
 Then visit <http://localhost:4000>, edit [web/elm/Game.elm](/web/elm/Game.elm) and see the changes.
 
-If you play the game (currently not much of a game, but A and D will rotate the ship),
+If you play the game (currently not much of a game, but A and D will rotate the ship and W will accelerate),
 you can edit the code and see the changes applied without the game resetting.
 
 # Commands used to deploy to heroku

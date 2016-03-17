@@ -27,8 +27,9 @@ render (w, h) gameState =
 
     -- basic
       -- remove players that hasn't been seen in a set time
-      -- publish x,y,vx,vy,direction updates initially, on control inputs and periodically
+      -- publish x,y,vx,vy,direction updates periodically
       -- subscribe to other players data updates
+      -- updates on control inputs for smoother updates
 
     -- better?
       -- publish control inputs
