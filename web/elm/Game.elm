@@ -26,7 +26,6 @@ render (w, h) gameState =
       -- simple html form to ask for nickname add as query param?
 
     -- basic
-      -- add port to add/update a player, test manually
       -- remove players that hasn't been seen in a set time
       -- publish x,y,vx,vy,direction updates initially, on control inputs and periodically
       -- subscribe to other players data updates
@@ -179,9 +178,12 @@ update event gameState =
       |> updateLocal input
       |> updateAllPlayers input
 
-    NewPlayer player ->
+    NewOrUpdatedPlayer player ->
       if gameState.players == [] then
         { gameState | players = [ player ], playerId = player.id }
+      else if (findPlayer gameState player.id).id == player.id then
+        updatePlayer player.id gameState (\oldPlayer -> player)
+        |> onlyGameState
       else
         { gameState | players = (List.concat [ gameState.players, [ player ] ]) }
 
@@ -307,7 +309,7 @@ updatePlayer id gameState callback =
 findPlayer gameState id =
   List.filter (\player -> player.id == id) gameState.players
   |> List.head
-  |> Maybe.withDefault { x = 0, y = 0, vx = 0, vy = 0, direction = 0, engineRunning = False, id = "", nickname = "" }
+  |> Maybe.withDefault { x = 0, y = 0, vx = 0, vy = 0, direction = 0, engineRunning = False, id = "not-found", nickname = "" }
 
 playerIsChangingSpeedOrDirection input =
   input.turnDirection /= 0 || input.thrustDirection /= 0
@@ -347,7 +349,7 @@ gameState =
 events : Signal Event
 events =
   (Signal.map NewInput input)
-  |> Signal.merge (Signal.map NewPlayer addPlayer)
+  |> Signal.merge (Signal.map NewOrUpdatedPlayer addOrUpdatePlayer)
   |> Signal.merge (Signal.map UpdatedPing ping)
 
 input : Signal Input
@@ -372,12 +374,12 @@ port initialGameState : GameState
 
 port ping : Signal Int
 
-port addPlayer : Signal Player
+port addOrUpdatePlayer : Signal Player
 
 main =
   Signal.map2 render Window.dimensions gameState
 
-type Event = NewInput Input | NewPlayer Player | UpdatedPing Int -- | UpdatedPlayer Player
+type Event = NewInput Input | NewOrUpdatedPlayer Player | UpdatedPing Int -- | UpdatedPlayer Player
 
 type alias GameState =
   {

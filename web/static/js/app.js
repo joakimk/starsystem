@@ -27,28 +27,26 @@ window.gameState = {
   ping: 0
 }
 
+var localPlayer = {
+  id: generateUUID(),
+  x: 500, y: 200,
+  vx: 0, vy: -70,
+  direction: 300,
+  engineRunning: false,
+  nickname: "Player"
+}
+
 // App reloading
 function loadApp()
 {
   var gameElement = document.getElementById("js-game")
-  var player = {
-    id: generateUUID(),
-    x: 500, y: 200,
-    vx: 0, vy: -70,
-    direction: 300,
-    engineRunning: false,
-    nickname: "Player"
-  }
 
   var app = Elm.embed(Elm.Game, gameElement, {
     initialGameState: window.gameState,
     ping: 0,
     // we have to provide a default value for the port, but as it happens at "initialization time", it isn't used in the update loop :(
-    addPlayer: player,
+    addOrUpdatePlayer: localPlayer,
   })
-
-  // Add the local player
-  app.ports.addPlayer.send(player)
 
   app.ports.stateChange.subscribe((state) => {
     window.gameState = state
@@ -86,12 +84,29 @@ channel.on("pong", (data) => {
 
 ping()
 
-// NPC :)
-app.ports.addPlayer.send({
-  id: generateUUID(),
+// Add the local player
+app.ports.addOrUpdatePlayer.send(localPlayer)
+
+// Add NPC :)
+var npcId = generateUUID()
+
+app.ports.addOrUpdatePlayer.send({
+  id: npcId,
   x: 320, y: 150,
   vx: 0, vy: -70,
   direction: 300,
   engineRunning: false,
   nickname: "NPC"
 })
+
+// Testing updates
+function moveNpc() {
+  var npc = window.gameState.players[1]
+  npc.nickname = "NPC (updated)"
+  npc.y -= 100
+  app.ports.addOrUpdatePlayer.send(npc)
+}
+
+setTimeout(moveNpc, 3000)
+
+// Todo: test players being removed when no updates arrive and they are not the local player
