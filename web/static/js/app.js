@@ -6,7 +6,8 @@ socket.connect()
 let channel = socket.channel("game", {})
 channel.join()
 
-function generateGuid() {
+// http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript/2117523#2117523
+function generateUUID() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
       var r = Math.random() * 16|0;
       var v = (c == "x" ? r : (r & 0x3|0x8));
@@ -19,7 +20,7 @@ function generateGuid() {
 window.gameState = {
   players: [
     {
-      id: generateGuid(),
+      id: generateUUID(),
       x: 500, y: 200,
       vx: 0, vy: -70,
       direction: 300,
@@ -29,7 +30,7 @@ window.gameState = {
 
     // NPC :)
     {
-      id: generateGuid(),
+      id: generateUUID(),
       x: 320, y: 150,
       vx: 0, vy: -70,
       direction: 300,
