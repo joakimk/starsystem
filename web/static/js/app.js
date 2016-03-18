@@ -89,25 +89,11 @@ ping()
 // Add the local player
 app.ports.addOrUpdatePlayer.send(localPlayer)
 
-// Add NPC :)
-app.ports.addOrUpdatePlayer.send({
-  id: generateUUID(),
-  x: 320, y: 150,
-  vx: 0, vy: -70,
-  direction: 300,
-  engineRunning: false,
-  nickname: "NPC",
-  lastSeenTime: 0,
+// Hook up multiplayer
+app.ports.publishPlayerUpdate.subscribe((player) => {
+  channel.push("player_update", player)
 })
 
-// Testing updates
-function moveNpc() {
-  var npc = window.gameState.players[1]
-  npc.nickname = "NPC (updated)"
-  npc.y -= 100
-  app.ports.addOrUpdatePlayer.send(npc)
-}
-
-setTimeout(moveNpc, 3000)
-
-// Todo: test players being removed when no updates arrive and they are not the local player
+channel.on("player_update", (player) => {
+  app.ports.addOrUpdatePlayer.send(player)
+})

@@ -1,7 +1,7 @@
 module Game.Update (..) where
 
 import Game.Types exposing (..)
-import Game.Math exposing (directionToTheSun, normalizeDirection)
+import Game.Math exposing (directionToTheSun, normalizeDirection, distanceTo)
 import Game.Player exposing (findPlayer, localPlayer, playerIsChangingSpeedOrDirection)
 
 -- Update
@@ -21,8 +21,17 @@ update event gameState =
       in
         if gameState.players == [] then
           { gameState | players = [ player ], playerId = player.id }
+        else if player.id == gameState.playerId then
+          gameState -- don't update for local player updates
         else if (findPlayer gameState player.id).id == player.id then
-          updatePlayer player.id gameState (\oldPlayer -> player)
+          updatePlayer player.id gameState (\oldPlayer ->
+            -- smooth out updates a bit: don't update if the local
+            -- calculation is close to what we received
+            if distanceTo (oldPlayer.x, oldPlayer.y) player > 50 then
+              { player | x = oldPlayer.x, y = oldPlayer.y }
+            else
+              oldPlayer
+          )
           |> onlyGameState
         else
           { gameState | players = (List.concat [ gameState.players, [ player ] ]) }

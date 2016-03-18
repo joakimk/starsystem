@@ -22,4 +22,9 @@ defmodule Starsystem.GameChannel do
     push socket, "pong", data
     {:noreply, socket}
   end
+
+  def handle_in("player_update", player, socket) do
+    broadcast! socket, "player_update", player
+    {:noreply, socket}
+  end
 end

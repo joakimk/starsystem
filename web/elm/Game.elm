@@ -7,6 +7,7 @@ import Window
 import Game.Types exposing (..)
 import Game.Update exposing (update)
 import Game.Render exposing (render)
+import Game.Player exposing (localPlayer)
 
 gameState : Signal GameState
 gameState =
@@ -42,6 +43,10 @@ port initialGameState : GameState
 port ping : Signal Int
 
 port addOrUpdatePlayer : Signal Player
+
+port publishPlayerUpdate : Signal Player
+port publishPlayerUpdate =
+  Signal.sampleOn (every 250) <| Signal.map localPlayer gameState
 
 main =
   Signal.map2 render Window.dimensions gameState
