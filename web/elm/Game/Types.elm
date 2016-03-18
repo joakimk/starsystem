@@ -2,7 +2,7 @@ module Game.Types (..) where
 
 import Time exposing (..)
 
-type Event = NewInput Input | NewOrUpdatedPlayer Player | UpdatedPing Int -- | UpdatedPlayer Player
+type Event = NewInput Input | NewOrUpdatedPlayer Player | UpdatedPing Int | UpdatedTime Time
 
 type alias GameState =
   {
@@ -12,6 +12,7 @@ type alias GameState =
   , orbitalBodies : List OrbitalBody
   , ping : Int
   , playerId : String
+  , timestamp : Time
   }
 
 type alias Player =
@@ -23,6 +24,7 @@ type alias Player =
   , engineRunning : Bool
   , id : String
   , nickname : String
+  , lastSeenTime : Time
   }
 
 type alias OrbitalBody =

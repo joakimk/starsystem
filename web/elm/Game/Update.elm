@@ -11,20 +11,40 @@ update event gameState =
   case event of
     NewInput input ->
       gameState
+      |> removeInactivePlayers
       |> updateLocal input
       |> updateAllPlayers input
 
-    NewOrUpdatedPlayer player ->
-      if gameState.players == [] then
-        { gameState | players = [ player ], playerId = player.id }
-      else if (findPlayer gameState player.id).id == player.id then
-        updatePlayer player.id gameState (\oldPlayer -> player)
-        |> onlyGameState
-      else
-        { gameState | players = (List.concat [ gameState.players, [ player ] ]) }
+    NewOrUpdatedPlayer rawPlayer ->
+      let
+        player = { rawPlayer | lastSeenTime = gameState.timestamp }
+      in
+        if gameState.players == [] then
+          { gameState | players = [ player ], playerId = player.id }
+        else if (findPlayer gameState player.id).id == player.id then
+          updatePlayer player.id gameState (\oldPlayer -> player)
+          |> onlyGameState
+        else
+          { gameState | players = (List.concat [ gameState.players, [ player ] ]) }
 
     UpdatedPing ping ->
       { gameState | ping = ping }
+
+    UpdatedTime timestamp ->
+      { gameState | timestamp = timestamp }
+
+removeInactivePlayers : GameState -> GameState
+removeInactivePlayers gameState =
+  let
+    timeout = 5000 -- ms (not exact, depends on UpdatedTime interval)
+    remainingPlayers = List.filter (\player ->
+        player.id == gameState.playerId ||
+        player.lastSeenTime == 0 ||
+        (gameState.timestamp - player.lastSeenTime) < timeout
+      )
+      gameState.players
+  in
+    { gameState | players = remainingPlayers }
 
 updateAllPlayers input gameState =
   List.foldr updateGlobal (gameState, input) gameState.players

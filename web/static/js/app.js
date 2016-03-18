@@ -24,7 +24,8 @@ window.gameState = {
   orbitalBodies: [
     { x: -500, y: 350, size: 100, gravity: 5 }
   ],
-  ping: 0
+  ping: 0,
+  timestamp: 0,
 }
 
 var localPlayer = {
@@ -33,7 +34,8 @@ var localPlayer = {
   vx: 0, vy: -70,
   direction: 300,
   engineRunning: false,
-  nickname: "Player"
+  nickname: "Player",
+  lastSeenTime: 0,
 }
 
 // App reloading
@@ -94,7 +96,8 @@ app.ports.addOrUpdatePlayer.send({
   vx: 0, vy: -70,
   direction: 300,
   engineRunning: false,
-  nickname: "NPC"
+  nickname: "NPC",
+  lastSeenTime: 0,
 })
 
 // Testing updates

@@ -17,6 +17,7 @@ events =
   (Signal.map NewInput input)
   |> Signal.merge (Signal.map NewOrUpdatedPlayer addOrUpdatePlayer)
   |> Signal.merge (Signal.map UpdatedPing ping)
+  |> Signal.merge (Signal.map UpdatedTime (every second))
 
 input : Signal Input
 input =

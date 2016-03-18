@@ -27,10 +27,10 @@ render (w, h) gameState =
       -- simple html form to ask for nickname add as query param?
 
     -- basic
-      -- remove players that hasn't been seen in a set time
       -- publish x,y,vx,vy,direction updates periodically
       -- subscribe to other players data updates
       -- updates on control inputs for smoother updates
+      -- don't update x,y, vx, vy if it's close to avoid jumping due to ping-delay?
 
     -- better?
       -- publish control inputs
