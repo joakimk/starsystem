@@ -4,9 +4,9 @@ Playing around with Elm and live code updates by building a game.
 
 The rough idea is to build a spaceship game where you can move around within a star system.
 
-When/if there is ever enough game there I hope to add multiplayer through the phoenix server.
+See the Elm [/starsystem/tree/master/web/elm](game code).
 
-**Status:** Preparing for multiplayer
+**Status:** Basic multiplayer works. Try it at <https://starsystemgame.herokuapp.com/>.
 
 # Screenshot
 
