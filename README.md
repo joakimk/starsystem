@@ -4,7 +4,7 @@ Playing around with Elm and live code updates by building a game.
 
 The rough idea is to build a spaceship game where you can move around within a star system.
 
-See the Elm [/starsystem/tree/master/web/elm](game code).
+See the Elm [game code][/starsystem/tree/master/web/elm].
 
 **Status:** Basic multiplayer works. Try it at <https://starsystemgame.herokuapp.com/>.
 
