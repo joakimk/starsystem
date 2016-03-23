@@ -70,7 +70,7 @@ renderOrbitalBody : Player -> OrbitalBody -> Form
 renderOrbitalBody player orbitalBody =
   let
     color =
-      radial (0,0) 50 (0, 10) (orbitalBody.size * 0.95)
+      radial (0,0) (orbitalBody.size * 0.3) (0, 10) (orbitalBody.size * 0.95)
         [ (  0, rgb  250 150 20)
         , (0.8, rgb  170 100 100)
         , (  1, rgba 50 100 10 0)

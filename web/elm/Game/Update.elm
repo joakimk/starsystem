@@ -62,6 +62,7 @@ updateAllPlayers input gameState =
 updateLocal input gameState =
   gameState
   |> changeSolarState input
+  |> updateOrbitalBodies input
   |> updateLocalPlayer input
   |> onlyGameState
 
@@ -103,6 +104,22 @@ changeSolarState input gameState =
         solarState = gameState.solarState - 0.5 * input.delta
       }
 
+updateOrbitalBodies: Input -> GameState -> GameState
+updateOrbitalBodies input gameState =
+  let
+    orbitalBodies = List.map (updateOrbitalBody input.delta) gameState.orbitalBodies
+  in
+    { gameState | orbitalBodies = orbitalBodies }
+
+updateOrbitalBody : Float -> OrbitalBody -> OrbitalBody
+updateOrbitalBody delta orbitalBody =
+  { orbitalBody |
+    vx = orbitalBody.vx + 10 * (orbitalBody |> directionToTheSun |> degrees |> sin) * delta
+  , vy = orbitalBody.vy + 10 * (orbitalBody |> directionToTheSun |> degrees |> cos) * delta
+  , x = orbitalBody.x + (delta * orbitalBody.vx)
+  , y = orbitalBody.y - (delta * orbitalBody.vy)
+  }
+
 updateInputs input (gameState, player) =
   let
     degreesPerSecond = (360 * input.delta) / 2
@@ -130,6 +147,7 @@ updateMovement input (gameState, player) =
   , player.y + player.vy * input.delta
   )
 
+updateSolarGravity : Input -> (GameState, Player) -> (GameState, Player)
 updateSolarGravity input (gameState, player) =
   (gameState, player) |> updateVelocity (
     player.vx + 10 * (player |> directionToTheSun |> degrees |> sin) * input.delta

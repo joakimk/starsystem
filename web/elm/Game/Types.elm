@@ -30,6 +30,8 @@ type alias Player =
 type alias OrbitalBody =
   { x : Float
   , y : Float
+  , vx : Float
+  , vy : Float
   , size : Float
   , gravity : Int
   }

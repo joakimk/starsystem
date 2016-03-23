@@ -22,7 +22,8 @@ window.gameState = {
   playerId: "none-yet",
   solarState: 0, solarStateDirection: 0,
   orbitalBodies: [
-    { x: -500, y: 350, size: 100, gravity: 5 }
+    { x: -500, y: 350, vx: 0, vy: 70, size: 100, gravity: 5 },
+    { x: -400, y: 150, vx: 20, vy: 90, size: 50, gravity: 5 }
   ],
   ping: 0,
   timestamp: 0,
@@ -30,7 +31,7 @@ window.gameState = {
 
 var localPlayer = {
   id: generateUUID(),
-  x: 500, y: 200,
+  x: 500, y: 0,
   vx: 0, vy: -70,
   direction: 300,
   engineRunning: false,
